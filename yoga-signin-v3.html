@@ -165,6 +165,23 @@ body {
 }
 
 /* Member buttons grid */
+.aiueo-btn {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.85rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--sage-light);
+  background: white;
+  color: var(--sage-dark);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.aiueo-btn.active {
+  background: var(--sage);
+  color: white;
+  border-color: var(--sage);
+}
+
 .member-grid {
   flex: 1;
   display: grid;
@@ -784,6 +801,21 @@ body {
     <div class="kiosk-prompt-sub" id="kioskPromptSub">サインインはお名前をタップするだけです</div>
   </div>
 
+  <!-- あいうえお絞り込み -->
+  <div id="aiueoFilter" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;justify-content:center;">
+    <button class="aiueo-btn active" onclick="filterGrid('')">全員</button>
+    <button class="aiueo-btn" onclick="filterGrid('あ')">あ</button>
+    <button class="aiueo-btn" onclick="filterGrid('か')">か</button>
+    <button class="aiueo-btn" onclick="filterGrid('さ')">さ</button>
+    <button class="aiueo-btn" onclick="filterGrid('た')">た</button>
+    <button class="aiueo-btn" onclick="filterGrid('な')">な</button>
+    <button class="aiueo-btn" onclick="filterGrid('は')">は</button>
+    <button class="aiueo-btn" onclick="filterGrid('ま')">ま</button>
+    <button class="aiueo-btn" onclick="filterGrid('や')">や</button>
+    <button class="aiueo-btn" onclick="filterGrid('ら')">ら</button>
+    <button class="aiueo-btn" onclick="filterGrid('わ')">わ</button>
+  </div>
+
   <!-- Member tap grid -->
   <div class="member-grid" id="memberGrid"></div>
 
@@ -997,14 +1029,6 @@ body {
     </div>
     <div class="af-group"><label class="af-label">お名前</label><input type="text" class="af-input" id="newMName" placeholder="山田 花子"></div>
     <div class="af-group"><label class="af-label">電話番号（任意）</label><input type="text" class="af-input" id="newMPhone" placeholder="090-0000-0000"></div>
-    <div class="af-group"><label class="af-label">チケット</label>
-      <select class="af-input" id="newMTicket">
-        <option value="monthly">月謝</option>
-        <option value="drop">ドロップイン</option>
-        <option value="10">10回チケット</option>
-        <option value="free">体験・無料</option>
-      </select>
-    </div>
     <button class="abtn abtn-green" style="width:100%;" onclick="addMember()">登録する</button>
   </div>
 </div>
@@ -1126,13 +1150,14 @@ async function init() {
   try {
     const [mRes, aRes, sRes] = await Promise.all([
       gasCall({action:'getMembers'}),
-      gasCall({action:'getAttendance', date: todayStr}),
+      gasCall({action:'getAttendance'}),
       gasCall({action:'getSales', month: todayStr.slice(0,7)}),
     ]);
 
     console.log('メンバー取得結果:', JSON.stringify(mRes));
 
     if (mRes.members) members = mRes.members.map(m => ({...m, visits:[]}));
+
     if (aRes.attendance) {
       // 出席データを attendance 形式に変換
       attendance = [];
@@ -1143,8 +1168,14 @@ async function init() {
           attendance.push(rec);
         }
         rec.attendees.push({memberId:r.memberId, name:r.name, ticket:r.ticket, time:r.time});
+        // メンバーの来訪履歴にも追加
+        const member = members.find(m => m.id === r.memberId);
+        if (member) member.visits.push({date:r.date, class:r.className, time:r.time});
       });
+      // 来訪履歴を日付降順に並べ直す
+      members.forEach(m => m.visits.sort((a,b) => b.date.localeCompare(a.date)));
     }
+
     if (sRes.sales) sales = sRes.sales;
   } catch(e) {
     toast('データ読み込みエラー。オフラインで動作します。', 'err');
@@ -1186,7 +1217,38 @@ function toast(msg, type='ok') {
   clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), 2600);
 }
 
-// ===== KIOSK CLASS SETUP =====
+// あいうえお絞り込み
+const AIUEO_RANGES = {
+  'あ': ['あ','い','う','え','お','ア','イ','ウ','エ','オ'],
+  'か': ['か','き','く','け','こ','カ','キ','ク','ケ','コ'],
+  'さ': ['さ','し','す','せ','そ','サ','シ','ス','セ','ソ'],
+  'た': ['た','ち','つ','て','と','タ','チ','ツ','テ','ト'],
+  'な': ['な','に','ぬ','ね','の','ナ','ニ','ヌ','ネ','ノ'],
+  'は': ['は','ひ','ふ','へ','ほ','ハ','ヒ','フ','ヘ','ホ'],
+  'ま': ['ま','み','む','め','も','マ','ミ','ム','メ','モ'],
+  'や': ['や','ゆ','よ','ヤ','ユ','ヨ'],
+  'ら': ['ら','り','る','れ','ろ','ラ','リ','ル','レ','ロ'],
+  'わ': ['わ','を','ん','ワ','ヲ','ン'],
+};
+let currentFilter = '';
+
+function filterGrid(row) {
+  currentFilter = row;
+  document.querySelectorAll('.aiueo-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === (row || '全員'));
+  });
+  renderMemberGrid();
+}
+
+function matchFilter(name) {
+  if (!currentFilter) return true;
+  const chars = AIUEO_RANGES[currentFilter] || [];
+  // 名前の最初の文字（スペース除く）で判定
+  const first = name.replace(/\s/g, '')[0] || '';
+  return chars.includes(first);
+}
+
+
 let setupSelectedClass = null;
 
 function openClassSetup() {
@@ -1243,8 +1305,9 @@ function updateKioskClassDisplay() {
 
 function renderMemberGrid() {
   const grid = document.getElementById('memberGrid');
+  const filtered = members.filter(m => matchFilter(m.name));
   if (!kioskClass) {
-    grid.innerHTML = members.map(m=>`
+    grid.innerHTML = filtered.map(m=>`
       <div class="member-tap-btn" style="opacity:0.4;pointer-events:none;">
         <div class="member-avatar-k">${m.name[0]}</div>
         <div class="member-tap-name">${m.name}</div>
@@ -1252,7 +1315,7 @@ function renderMemberGrid() {
       </div>`).join('');
     return;
   }
-  grid.innerHTML = members.map(m=>{
+  grid.innerHTML = filtered.map(m=>{
     const done = kioskAttendees.includes(m.id);
     return `<div class="member-tap-btn${done?' signed-in':''}" onclick="kioskSignIn('${m.id}',event)">
       <div class="member-avatar-k">${m.name[0]}</div>
@@ -1462,18 +1525,15 @@ function openAddM() { document.getElementById('newMName').value=''; document.get
 async function addMember() {
   const name = document.getElementById('newMName').value.trim();
   if (!name) { toast('名前を入力してください','err'); return; }
-  const ticket = document.getElementById('newMTicket').value;
-  const ttype = TICKET_TYPES.find(t=>t.id===ticket);
-  const remaining = ttype?.remaining ?? null;
   const phone = document.getElementById('newMPhone').value.trim();
 
   showLoading(true);
-  const res = await gasCall({action:'addMember', name, phone, ticket, ticketRemaining: remaining ?? 'null'});
+  const res = await gasCall({action:'addMember', name, phone, ticket:'', ticketRemaining:'null'});
   showLoading(false);
 
   if (res.error) { toast('登録エラー: ' + res.error, 'err'); return; }
 
-  members.push({id:res.id, name, phone, ticket, ticketRemaining:remaining, visits:[]});
+  members.push({id:res.id, name, phone, ticket:'', ticketRemaining:null, visits:[]});
   document.getElementById('addMModal').classList.remove('open');
   renderMCards();
   updateSelects();
