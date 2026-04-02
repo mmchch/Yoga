@@ -1114,20 +1114,16 @@ async function init() {
 
   showLoading(true);
 
-  // GASからメンバー・本日の出席・売上を取得
   try {
-    const [mRes, aRes, sRes] = await Promise.all([
+    // 起動時はメンバーと本日の出席だけ取得（高速化）
+    const [mRes, aRes] = await Promise.all([
       gasCall({action:'getMembers'}),
-      gasCall({action:'getAttendance'}),
-      gasCall({action:'getSales', month: todayStr.slice(0,7)}),
+      gasCall({action:'getAttendance', date: todayStr}),
     ]);
-
-    console.log('メンバー取得結果:', JSON.stringify(mRes));
 
     if (mRes.members) members = mRes.members.map(m => ({...m, visits:[]}));
 
     if (aRes.attendance) {
-      // 出席データを attendance 形式に変換
       attendance = [];
       aRes.attendance.forEach(r => {
         let rec = attendance.find(a => a.date===r.date && a.classId===r.classId);
@@ -1136,15 +1132,8 @@ async function init() {
           attendance.push(rec);
         }
         rec.attendees.push({memberId:r.memberId, name:r.name, ticket:r.ticket, time:r.time});
-        // メンバーの来訪履歴にも追加
-        const member = members.find(m => m.id === r.memberId);
-        if (member) member.visits.push({date:r.date, class:r.className, time:r.time});
       });
-      // 来訪履歴を日付降順に並べ直す
-      members.forEach(m => m.visits.sort((a,b) => b.date.localeCompare(a.date)));
     }
-
-    if (sRes.sales) sales = sRes.sales;
   } catch(e) {
     toast('データ読み込みエラー。オフラインで動作します。', 'err');
   }
@@ -1401,23 +1390,53 @@ function renderCalendar() {
 
 function cMo(dir){ calMonth.setMonth(calMonth.getMonth()+dir); renderCalendar(); }
 
-function selCalDate(ds){
+async function selCalDate(ds){
   calSel=ds;
   renderCalendar();
   const [y,m,d]=ds.split('-');
   document.getElementById('calSelLabel').textContent=`${y}年${parseInt(m)}月${parseInt(d)}日のクラス`;
-  const recs=attendance.filter(a=>a.date===ds);
   const el=document.getElementById('calLog');
-  if(!recs.length){ el.innerHTML='<div class="empty"><div class="empty-icon">🌿</div><div class="empty-txt">この日の記録はありません</div></div>'; return; }
-  el.innerHTML=recs.map(r=>`
-    <div class="log-entry">
-      <div class="log-cn">${r.className}</div>
-      <div class="log-meta">
-        <span class="log-cb">👥 ${r.attendees.length}名</span>
-        <span class="log-t">${classes.find(c=>c.id===r.classId)?.time||''}</span>
-      </div>
-      <div class="log-names">${r.attendees.map(a=>`${a.name}（${tLabel(a.ticket)}）`).join('　/　')}</div>
-    </div>`).join('');
+  el.innerHTML='<div class="empty"><div class="empty-icon">🌿</div><div class="empty-txt">読み込み中...</div></div>';
+
+  // その日のデータをGASから取得
+  try {
+    const res = await gasCall({action:'getAttendance', date:ds});
+    if (!res.attendance || !res.attendance.length) {
+      el.innerHTML='<div class="empty"><div class="empty-icon">🌿</div><div class="empty-txt">この日の記録はありません</div></div>';
+      return;
+    }
+    // attendance配列にマージ
+    res.attendance.forEach(r => {
+      let rec = attendance.find(a => a.date===r.date && a.classId===r.classId);
+      if (!rec) {
+        rec = {date:r.date, classId:r.classId, className:r.className, attendees:[]};
+        attendance.push(rec);
+      } else {
+        rec.attendees = [];
+      }
+      rec.attendees.push({memberId:r.memberId, name:r.name, ticket:r.ticket, time:r.time});
+    });
+    // 表示
+    const recs = attendance.filter(a=>a.date===ds);
+    // 同じclassIdでまとめる
+    const grouped = {};
+    res.attendance.forEach(r => {
+      if (!grouped[r.classId]) grouped[r.classId] = {classId:r.classId, className:r.className, attendees:[]};
+      grouped[r.classId].attendees.push(r);
+    });
+    el.innerHTML = Object.values(grouped).map(r=>`
+      <div class="log-entry">
+        <div class="log-cn">${r.className}</div>
+        <div class="log-meta">
+          <span class="log-cb">👥 ${r.attendees.length}名</span>
+          <span class="log-t">${classes.find(c=>c.id===r.classId)?.time||''}</span>
+        </div>
+        <div class="log-names">${r.attendees.map(a=>`${a.name}`).join('　/　')}</div>
+      </div>`).join('');
+    renderCalendar(); // ドットを更新
+  } catch(e) {
+    el.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-txt">読み込みエラー</div></div>';
+  }
 }
 
 // ===== MEMBERS =====
@@ -1440,21 +1459,33 @@ function renderMCards() {
     </div>`;}).join('');
 }
 
-function openMModal(id) {
+async function openMModal(id) {
   const m=members.find(m=>m.id===id);
   if(!m) return;
   document.getElementById('mModalName').textContent=m.name;
   document.getElementById('mModalId').textContent=m.id+(m.phone?'　'+m.phone:'');
-  const ti=m.ticket==='monthly'?'月謝会員':m.ticket==='10'?`10回チケット（残${m.ticketRemaining}回）`:m.ticket==='drop'?`ドロップイン（残${m.ticketRemaining}回）`:'体験・無料';
-  const hh=m.visits.length?`<ul class="hist-list">${m.visits.slice(0,8).map(v=>`<li class="hist-li"><span>${fmtDate(v.date)} ${v.class}</span><span style="color:var(--sage);font-family:'Space Mono',monospace">${v.time}</span></li>`).join('')}</ul>`:'<div style="color:var(--sage-light);font-size:0.8rem;margin-top:8px;">来訪記録なし</div>';
   document.getElementById('mModalContent').innerHTML=`
-    <div style="background:rgba(107,158,112,0.08);border-radius:10px;padding:13px;margin-bottom:14px;">
-      <div style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--sage);margin-bottom:4px;">チケット</div>
-      <div style="font-size:0.88rem;color:var(--charcoal);">${ti}</div>
-    </div>
-    <div style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--sage);margin-bottom:9px;">来訪履歴（最近8回）</div>
-    ${hh}`;
+    <div style="color:var(--sage-light);font-size:0.8rem;margin-top:8px;">読み込み中...</div>`;
   document.getElementById('mModal').classList.add('open');
+
+  // GASから来訪履歴を取得
+  try {
+    const res = await gasCall({action:'getAttendance', memberId:id});
+    const visits = (res.attendance||[]).sort((a,b)=>b.date.localeCompare(a.date));
+    const ti = m.ticket ? tLabel(m.ticket) + (m.ticketRemaining!=null?`（残${m.ticketRemaining}回）`:'') : '未設定';
+    const hh = visits.length
+      ? `<ul class="hist-list">${visits.slice(0,10).map(v=>`<li class="hist-li"><span>${v.date} ${v.className}</span><span style="color:var(--sage);font-family:'Space Mono',monospace">${v.time||''}</span></li>`).join('')}</ul>`
+      : '<div style="color:var(--sage-light);font-size:0.8rem;margin-top:8px;">来訪記録なし</div>';
+    document.getElementById('mModalContent').innerHTML=`
+      <div style="background:rgba(107,158,112,0.08);border-radius:10px;padding:13px;margin-bottom:14px;">
+        <div style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--sage);margin-bottom:4px;">チケット</div>
+        <div style="font-size:0.88rem;color:var(--charcoal);">${ti}</div>
+      </div>
+      <div style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--sage);margin-bottom:9px;">来訪履歴（最近10回）</div>
+      ${hh}`;
+  } catch(e) {
+    document.getElementById('mModalContent').innerHTML='<div style="color:var(--soft-red);font-size:0.8rem;">読み込みエラー</div>';
+  }
 }
 
 function openAddM() { document.getElementById('newMName').value=''; document.getElementById('newMPhone').value=''; document.getElementById('addMModal').classList.add('open'); }
