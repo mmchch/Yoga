@@ -1115,10 +1115,10 @@ async function init() {
   showLoading(true);
 
   try {
-    // 起動時はメンバーと本日の出席だけ取得（高速化）
+    // 起動時にメンバーと全出席データを取得
     const [mRes, aRes] = await Promise.all([
       gasCall({action:'getMembers'}),
-      gasCall({action:'getAttendance', date: todayStr}),
+      gasCall({action:'getAttendance'}),
     ]);
 
     if (mRes.members) members = mRes.members.map(m => ({...m, visits:[]}));
@@ -1131,8 +1131,15 @@ async function init() {
           rec = {date:r.date, classId:r.classId, className:r.className, attendees:[]};
           attendance.push(rec);
         }
-        rec.attendees.push({memberId:r.memberId, name:r.name, ticket:r.ticket, time:r.time});
+        if (!rec.attendees.find(a=>a.memberId===r.memberId)) {
+          rec.attendees.push({memberId:r.memberId, name:r.name, ticket:r.ticket, time:r.time});
+        }
+        const member = members.find(m=>m.id===r.memberId);
+        if (member && !member.visits.find(v=>v.date===r.date&&v.class===r.className)) {
+          member.visits.push({date:r.date, class:r.className, time:r.time});
+        }
       });
+      members.forEach(m => m.visits.sort((a,b)=>b.date.localeCompare(a.date)));
     }
   } catch(e) {
     toast('データ読み込みエラー。オフラインで動作します。', 'err');
