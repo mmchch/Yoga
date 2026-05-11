@@ -1488,13 +1488,21 @@ function renderMCards() {
   const g=document.getElementById('mGrid');
   if(!list.length){ g.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div class="empty-txt">見つかりませんでした</div></div>'; return; }
   g.innerHTML=list.map(m=>{
-    const lv=m.visits[0];
+    // attendanceから来訪記録を直接集計
+    const mVisits = [];
+    attendance.forEach(rec => {
+      if (rec.attendees.find(a=>a.memberId===m.id)) {
+        mVisits.push({date:rec.date, class:rec.className});
+      }
+    });
+    mVisits.sort((a,b)=>b.date.localeCompare(a.date));
+    const lv=mVisits[0];
     return `<div class="m-card" onclick="openMModal('${m.id}')">
       <div class="m-av">${m.name[0]}</div>
       <div class="m-nm">${m.name}</div>
       <div class="m-id">${m.id}</div>
       <div class="m-st">
-        <div class="m-sb"><div class="m-sv">${m.visits.length}</div><div class="m-sl">累計回数</div></div>
+        <div class="m-sb"><div class="m-sv">${mVisits.length}</div><div class="m-sl">累計回数</div></div>
         <div class="m-sb"><div class="m-sv" style="font-size:0.9rem;padding-top:4px;">${tLabel(m.ticket)}</div><div class="m-sl">チケット</div></div>
       </div>
       ${lv?`<div class="m-lv">前回：${fmtDate(lv.date)}　${lv.class}</div>`:`<div class="m-lv" style="color:var(--sage-light)">来訪記録なし</div>`}
