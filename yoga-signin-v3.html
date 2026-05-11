@@ -1314,6 +1314,38 @@ function aTab(id, btn) {
   document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));
   document.getElementById('apanel-'+id).classList.add('active');
   btn.classList.add('active');
+  if (id === 'calendar') {
+    renderCalendar();
+    loadMonthAttendance();
+  }
+}
+
+// 全出席データをGASから取得してattendanceにマージ
+async function loadMonthAttendance() {
+  try {
+    const res = await gasCall({action:'getAttendance'});
+    if (!res || !res.attendance) {
+      console.error('loadMonthAttendance: レスポンス異常', res);
+      return;
+    }
+    console.log('loadMonthAttendance: 取得件数', res.attendance.length);
+    // 全件をattendanceにマージ
+    res.attendance.forEach(r => {
+      if (!r.date || !r.classId) return;
+      let rec = attendance.find(a => a.date===r.date && a.classId===r.classId);
+      if (!rec) {
+        rec = {date:r.date, classId:r.classId, className:r.className, attendees:[]};
+        attendance.push(rec);
+      }
+      if (!rec.attendees.find(a=>a.memberId===r.memberId)) {
+        rec.attendees.push({memberId:r.memberId, name:r.name, ticket:r.ticket, time:r.time});
+      }
+    });
+    console.log('loadMonthAttendance: attendanceレコード数', attendance.length);
+    renderCalendar();
+  } catch(e) {
+    console.error('loadMonthAttendance エラー:', e);
+  }
 }
 
 // Admin class buttons
@@ -1388,7 +1420,7 @@ function renderCalendar() {
   document.getElementById('calDg').innerHTML=h;
 }
 
-function cMo(dir){ calMonth.setMonth(calMonth.getMonth()+dir); renderCalendar(); }
+function cMo(dir){ calMonth.setMonth(calMonth.getMonth()+dir); renderCalendar(); loadMonthAttendance(); }
 
 async function selCalDate(ds){
   calSel=ds;
@@ -1396,33 +1428,14 @@ async function selCalDate(ds){
   const [y,m,d]=ds.split('-');
   document.getElementById('calSelLabel').textContent=`${y}年${parseInt(m)}月${parseInt(d)}日のクラス`;
   const el=document.getElementById('calLog');
-  el.innerHTML='<div class="empty"><div class="empty-icon">🌿</div><div class="empty-txt">読み込み中...</div></div>';
 
-  // その日のデータをGASから取得
-  try {
-    const res = await gasCall({action:'getAttendance', date:ds});
-    if (!res.attendance || !res.attendance.length) {
-      el.innerHTML='<div class="empty"><div class="empty-icon">🌿</div><div class="empty-txt">この日の記録はありません</div></div>';
-      return;
-    }
-    // attendance配列にマージ
-    res.attendance.forEach(r => {
-      let rec = attendance.find(a => a.date===r.date && a.classId===r.classId);
-      if (!rec) {
-        rec = {date:r.date, classId:r.classId, className:r.className, attendees:[]};
-        attendance.push(rec);
-      } else {
-        rec.attendees = [];
-      }
-      rec.attendees.push({memberId:r.memberId, name:r.name, ticket:r.ticket, time:r.time});
-    });
-    // 表示
+  function renderFromCache() {
     const recs = attendance.filter(a=>a.date===ds);
-    // 同じclassIdでまとめる
+    if (!recs.length) return false;
     const grouped = {};
-    res.attendance.forEach(r => {
-      if (!grouped[r.classId]) grouped[r.classId] = {classId:r.classId, className:r.className, attendees:[]};
-      grouped[r.classId].attendees.push(r);
+    recs.forEach(rec => {
+      if (!grouped[rec.classId]) grouped[rec.classId] = {classId:rec.classId, className:rec.className, attendees:[]};
+      rec.attendees.forEach(a => grouped[rec.classId].attendees.push(a));
     });
     el.innerHTML = Object.values(grouped).map(r=>`
       <div class="log-entry">
@@ -1431,11 +1444,33 @@ async function selCalDate(ds){
           <span class="log-cb">👥 ${r.attendees.length}名</span>
           <span class="log-t">${classes.find(c=>c.id===r.classId)?.time||''}</span>
         </div>
-        <div class="log-names">${r.attendees.map(a=>`${a.name}`).join('　/　')}</div>
+        <div class="log-names">${r.attendees.map(a=>a.name).join('　/　')}</div>
       </div>`).join('');
-    renderCalendar(); // ドットを更新
+    return true;
+  }
+
+  if (renderFromCache()) return;
+
+  el.innerHTML='<div class="empty"><div class="empty-icon">🌿</div><div class="empty-txt">読み込み中...</div></div>';
+  try {
+    const res = await gasCall({action:'getAttendance', date:ds});
+    if (!res.attendance || !res.attendance.length) {
+      el.innerHTML='<div class="empty"><div class="empty-icon">🌿</div><div class="empty-txt">この日の記録はありません</div></div>';
+      return;
+    }
+    res.attendance.forEach(r => {
+      let rec = attendance.find(a => a.date===r.date && a.classId===r.classId);
+      if (!rec) {
+        rec = {date:r.date, classId:r.classId, className:r.className, attendees:[]};
+        attendance.push(rec);
+      } else { rec.attendees = []; }
+      rec.attendees.push({memberId:r.memberId, name:r.name, ticket:r.ticket, time:r.time});
+    });
+    renderFromCache();
+    renderCalendar();
   } catch(e) {
     el.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-txt">読み込みエラー</div></div>';
+    console.error('selCalDate エラー:', e);
   }
 }
 
