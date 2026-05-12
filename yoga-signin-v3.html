@@ -836,6 +836,12 @@ body {
         </div>
       </div>
 
+      <!-- Class summary -->
+      <div class="acard" id="classSummaryCard" style="display:none;">
+        <span class="alabel">📋 クラスサマリー</span>
+        <div id="classSummary"></div>
+      </div>
+
       <!-- Manual add -->
       <div class="acard">
         <span class="alabel">手動でサインイン追加</span>
@@ -882,18 +888,18 @@ body {
     <div id="apanel-register" class="apanel">
       <div class="acard">
         <span class="alabel">お会計</span>
-        <div class="af-row" style="margin-bottom:12px;">
-          <div class="af-group">
-            <label class="af-label">メンバー（任意）</label>
-            <select class="af-input" id="regMember" style="margin-bottom:0;"></select>
-          </div>
-          <div class="af-group">
-            <label class="af-label">内容</label>
-            <select class="af-input" id="regItem" style="margin-bottom:0;" onchange="regItemChanged()"></select>
-          </div>
+        <div class="af-group" style="margin-bottom:12px;">
+          <label class="af-label">メンバー（任意）</label>
+          <select class="af-input" id="regMember" style="margin-bottom:0;"></select>
         </div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <select class="af-input" id="regItem" style="margin-bottom:0;flex:1;" onchange="regItemChanged()"></select>
+          <button class="abtn abtn-green" onclick="addToCart()" style="white-space:nowrap;padding:0 16px;">＋追加</button>
+        </div>
+        <!-- カート -->
+        <div id="cartList" style="margin-bottom:10px;"></div>
         <div class="reg-display">
-          <div class="reg-display-label">お支払い金額（税込）</div>
+          <div class="reg-display-label">お支払い合計（税込）</div>
           <div class="reg-display-amount" id="regAmount">¥ 0</div>
         </div>
       </div>
@@ -1154,6 +1160,7 @@ async function init() {
   salesMonth = new Date();
   renderSales();
   updateSelects();
+  renderCart();
 }
 
 // ===== HELPERS =====
@@ -1392,6 +1399,49 @@ function renderAdminAttList() {
         <span class="time-txt">${a.time}</span>
       </div>
     </div>`).join('');
+
+  // サマリー表示
+  renderClassSummary(list);
+}
+
+function renderClassSummary(list) {
+  const card = document.getElementById('classSummaryCard');
+  const el = document.getElementById('classSummary');
+  if (!list || !list.length) { card.style.display='none'; return; }
+  card.style.display='';
+
+  // チケット別集計
+  const ticketCount = {};
+  let salesTotal = 0;
+  list.forEach(a => {
+    const label = tLabel(a.ticket) || '未設定';
+    ticketCount[label] = (ticketCount[label]||0) + 1;
+    // 売上：都度払い系のみカウント
+    const tt = TICKET_TYPES.find(t=>t.id===a.ticket);
+    if (tt && tt.remaining === 1) salesTotal += tt.price; // 都度払い・お試し等
+  });
+
+  const ticketRows = Object.entries(ticketCount)
+    .map(([label, count]) => `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(107,158,112,0.1);">
+      <span style="color:var(--text-light);font-size:0.85rem;">${label}</span>
+      <span style="font-weight:600;color:var(--sage);">${count}名</span>
+    </div>`).join('');
+
+  // 売上はsalesシートから取得（本日・該当クラス）
+  const classSales = sales.filter(s=>s.date===todayStr);
+  const classTotal = classSales.reduce((sum,s)=>sum+s.amount, 0);
+
+  el.innerHTML = `
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.7rem;letter-spacing:0.1em;color:var(--sage);margin-bottom:6px;">チケット内訳</div>
+      ${ticketRows}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 4px;">
+      <span style="font-size:0.8rem;color:var(--text-light);">本日の売上合計</span>
+      <span style="font-size:1.3rem;font-weight:700;color:var(--sage-dark);">¥${classTotal.toLocaleString()}</span>
+    </div>
+    <div style="font-size:0.7rem;color:var(--sage-light);margin-top:2px;">※レジタブで登録した売上の合計</div>
+  `;
 }
 
 function manualAdd() {
@@ -1568,14 +1618,44 @@ const ticketPrices = { monthly:8000, drop:2000, '10':16000, free:0 };
 const payLabels = { cash:'現金', paypay:'PayPay', transfer:'振込', other:'その他' };
 const payClasses = { cash:'pay-cash', paypay:'pay-paypay', transfer:'pay-transfer', other:'pay-other' };
 
+let cart = []; // {typeId, label, price}
+
 function regItemChanged() {
+  // 選択変更時は何もしない（＋追加ボタンで追加）
+}
+
+function addToCart() {
   const sel = document.getElementById('regItem');
   const opt = sel.options[sel.selectedIndex];
-  const price = opt.dataset.price;
-  if (price !== undefined) {
-    regAmtVal = parseInt(price);
+  if (!opt || !opt.value) { toast('品目を選択してください', 'err'); return; }
+  const price = parseInt(opt.dataset.price) || 0;
+  cart.push({typeId: opt.value, label: opt.text, price});
+  renderCart();
+}
+
+function removeFromCart(idx) {
+  cart.splice(idx, 1);
+  renderCart();
+}
+
+function renderCart() {
+  const el = document.getElementById('cartList');
+  if (!cart.length) {
+    el.innerHTML = '<div style="color:var(--sage-light);font-size:0.8rem;padding:4px 0;">品目を選択して「＋追加」を押してください</div>';
+    regAmtVal = 0;
     updateRegDisplay();
+    return;
   }
+  el.innerHTML = cart.map((item, i) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(107,158,112,0.15);">
+      <span style="font-size:0.85rem;color:var(--text);">${item.label}</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-weight:600;color:var(--sage-dark);">¥${item.price.toLocaleString()}</span>
+        <button onclick="removeFromCart(${i})" style="background:none;border:none;color:var(--sage-light);font-size:1rem;cursor:pointer;padding:0 4px;">✕</button>
+      </div>
+    </div>`).join('');
+  regAmtVal = cart.reduce((sum, item) => sum + item.price, 0);
+  updateRegDisplay();
 }
 
 function regKey(k) {
@@ -1623,11 +1703,11 @@ function selPay(method) {
 
 async function completePayment() {
   if (regAmtVal === 0) { toast('金額を入力してください', 'err'); return; }
+  if (!cart.length) { toast('品目を追加してください', 'err'); return; }
   const memberId = document.getElementById('regMember').value;
   const member = members.find(m => m.id === memberId);
-  const itemSel = document.getElementById('regItem');
-  const typeId = itemSel.value;
-  const itemLabel = itemSel.options[itemSel.selectedIndex]?.text || '−';
+  const itemLabel = cart.map(c=>c.label).join('、');
+  const typeId = cart.length === 1 ? cart[0].typeId : 'custom';
 
   const sale = {
     date: todayStr,
@@ -1642,13 +1722,12 @@ async function completePayment() {
   };
   sales.unshift(sale);
 
-  // チケット自動登録・メンバー更新
-  if (member && typeId && typeId !== 'custom') {
+  // チケット自動登録（1品目でチケット系の場合のみ）
+  if (member && cart.length === 1 && typeId !== 'custom') {
     const ttype = TICKET_TYPES.find(t => t.id === typeId);
     if (ttype) {
       member.ticket = typeId;
       member.ticketRemaining = ttype.remaining;
-      // GASにメンバー情報更新
       gasCall({action:'updateMember', id:memberId, ticket:typeId, ticketRemaining: ttype.remaining ?? 'null'});
     }
   }
@@ -1657,7 +1736,9 @@ async function completePayment() {
   gasCall({action:'addSale', ...sale});
 
   // リセット
+  cart = [];
   regAmtVal = 0; recAmtVal = 0;
+  renderCart();
   updateRegDisplay(); updateRecDisplay();
   document.getElementById('regItem').value = '';
   document.querySelectorAll('#payMethodBtns .pay-btn').forEach(b => b.classList.remove('selected'));
