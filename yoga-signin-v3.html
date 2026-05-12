@@ -820,6 +820,17 @@ body {
 
     <!-- TODAY -->
     <div id="apanel-today" class="apanel active">
+      <!-- 天気カード -->
+      <div class="acard" id="weatherCard">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span class="alabel" style="margin-bottom:0;">🌤 本日の天気（佐賀）</span>
+          <button onclick="fetchWeather()" style="background:none;border:1px solid rgba(107,158,112,0.3);border-radius:8px;padding:4px 10px;font-size:0.75rem;color:var(--sage);cursor:pointer;">更新</button>
+        </div>
+        <div id="weatherInfo" style="margin-top:10px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
+          <div style="color:var(--sage-light);font-size:0.82rem;">読み込み中...</div>
+        </div>
+      </div>
+
       <div class="acard">
         <span class="alabel">本日のクラス選択</span>
         <div style="display:flex;gap:8px;flex-wrap:wrap;" id="adminClassBtns"></div>
@@ -1163,6 +1174,7 @@ async function init() {
   renderSales();
   updateSelects();
   renderCart();
+  fetchWeather();
 }
 
 // ===== HELPERS =====
@@ -1474,6 +1486,68 @@ function manualAdd() {
   renderAdminAttList();
   toast(`${member.name} さんを追加しました`);
 }
+
+// ===== WEATHER =====
+async function fetchWeather() {
+  const el = document.getElementById('weatherInfo');
+  el.innerHTML = '<div style="color:var(--sage-light);font-size:0.82rem;">取得中...</div>';
+  try {
+    // 気象庁API：佐賀県(410000)の予報
+    const res = await fetch('https://www.jma.go.jp/bosai/forecast/data/forecast/410000.json');
+    const data = await res.json();
+
+    // 今日の天気（佐賀地方）
+    const ts0 = data[0].timeSeries[0];
+    const sagaArea = ts0.areas.find(a => a.area.name === '佐賀') || ts0.areas[0];
+    const weatherCode = sagaArea.weatherCodes[0];
+    const weatherText = sagaArea.weathers[0].replace(/\s+/g, '');
+
+    // 気温（最高・最低）
+    const ts2 = data[0].timeSeries[2];
+    const sagaTemp = ts2.areas.find(a => a.area.name === '佐賀') || ts2.areas[0];
+    const temps = sagaTemp.temps;
+    const tempMin = temps[0] !== '' ? temps[0] : '−';
+    const tempMax = temps[1] !== '' ? temps[1] : '−';
+
+    // 天気コードからアイコン
+    const wIcon = weatherIcon(weatherCode);
+
+    el.innerHTML = `
+      <div style="font-size:2rem;">${wIcon}</div>
+      <div>
+        <div style="font-size:0.82rem;color:var(--text);margin-bottom:4px;">${weatherText}</div>
+        <div style="font-size:0.78rem;color:var(--sage-light);">
+          <span style="color:#e57373;">↑${tempMax}℃</span>
+          　
+          <span style="color:#64b5f6;">↓${tempMin}℃</span>
+        </div>
+      </div>
+    `;
+
+    // カレンダーの今日にも天気を記録
+    todayWeather = {icon: wIcon, text: weatherText, tempMin, tempMax};
+
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--sage-light);font-size:0.82rem;">取得できませんでした</div>';
+    console.error('天気取得エラー:', e);
+  }
+}
+
+function weatherIcon(code) {
+  const c = String(code).slice(0, 2);
+  const map = {
+    '10': '☀️', '11': '🌤', '12': '🌤', '13': '⛅', '14': '🌥',
+    '15': '🌦', '16': '🌦', '17': '⛈', '18': '🌧', '19': '🌧',
+    '20': '🌧', '21': '🌧', '22': '🌧', '23': '🌩', '24': '🌩',
+    '25': '🌨', '26': '🌨', '27': '❄️', '28': '❄️', '29': '🌫',
+    '30': '⛅', '31': '🌤', '32': '⛅', '33': '🌥', '34': '🌦',
+    '35': '🌦', '36': '🌧', '37': '🌧', '38': '🌧', '39': '🌧',
+    '40': '🌨', '41': '🌨', '42': '❄️',
+  };
+  return map[c] || '🌤';
+}
+
+let todayWeather = null;
 
 // ===== CALENDAR =====
 function renderCalendar() {
