@@ -1122,12 +1122,14 @@ async function init() {
 
   try {
     // 起動時にメンバーと全出席データを取得
-    const [mRes, aRes] = await Promise.all([
+    const [mRes, aRes, sRes] = await Promise.all([
       gasCall({action:'getMembers'}),
       gasCall({action:'getAttendance'}),
+      gasCall({action:'getSales'}),
     ]);
 
     if (mRes.members) members = mRes.members.map(m => ({...m, visits:[]}));
+    if (sRes.sales) sales = sRes.sales;
 
     if (aRes.attendance) {
       attendance = [];
@@ -1431,16 +1433,28 @@ function renderClassSummary(list) {
   const classSales = sales.filter(s=>s.date===todayStr);
   const classTotal = classSales.reduce((sum,s)=>sum+s.amount, 0);
 
+  // 売上明細行
+  const salesRows = classSales.length
+    ? classSales.map(s=>`
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(107,158,112,0.1);">
+          <span style="font-size:0.82rem;color:var(--text-light);">${s.name}　<span style="color:var(--sage-light);">${s.item}</span></span>
+          <span style="font-weight:600;color:var(--sage-dark);">¥${s.amount.toLocaleString()}</span>
+        </div>`).join('')
+    : '<div style="color:var(--sage-light);font-size:0.8rem;padding:4px 0;">レジ未入力</div>';
+
   el.innerHTML = `
     <div style="margin-bottom:12px;">
       <div style="font-size:0.7rem;letter-spacing:0.1em;color:var(--sage);margin-bottom:6px;">チケット内訳</div>
       ${ticketRows}
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 4px;">
-      <span style="font-size:0.8rem;color:var(--text-light);">本日の売上合計</span>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:0.7rem;letter-spacing:0.1em;color:var(--sage);margin-bottom:6px;">売上明細</div>
+      ${salesRows}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 4px;border-top:2px solid rgba(107,158,112,0.2);">
+      <span style="font-size:0.85rem;font-weight:600;color:var(--text);">本日の売上合計</span>
       <span style="font-size:1.3rem;font-weight:700;color:var(--sage-dark);">¥${classTotal.toLocaleString()}</span>
     </div>
-    <div style="font-size:0.7rem;color:var(--sage-light);margin-top:2px;">※レジタブで登録した売上の合計</div>
   `;
 }
 
