@@ -1057,6 +1057,20 @@ function resetCCZone() {
   zone.innerHTML = '<div class="rz-icon">💳</div><div class="rz-text">クレカ明細CSVを選択</div><div class="rz-sub">Saison / 楽天 / AEON</div>';
 }
 
+// ─── CSV共通ユーティリティ ───────────────────────────────────
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+    else { cur += c; }
+  }
+  result.push(cur.trim());
+  return result;
+}
+
 // ─── Amazon CSV取り込み ──────────────────────────────────────
 const AMAZON_CAT_MAP = {
   'grocery':         '消耗品費',
@@ -1100,20 +1114,6 @@ async function importAmazonCSV(input) {
     toast('CSVの形式が正しくありません', 'err');
     resetAmazonZone();
     return;
-  }
-
-  // CSVパース（カンマ区切り、ダブルクォート対応）
-  function parseCSVLine(line) {
-    const result = [];
-    let cur = '', inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const c = line[i];
-      if (c === '"') { inQ = !inQ; }
-      else if (c === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
-      else { cur += c; }
-    }
-    result.push(cur.trim());
-    return result;
   }
 
   // 重複除去用（同じ注文番号+商品名は1回だけ）
