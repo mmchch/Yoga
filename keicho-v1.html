@@ -1000,8 +1000,8 @@ function renderCCList() {
         <div class="cc-item" id="cc-row-${i}" style="flex-wrap:wrap;gap:6px;padding:10px 0;">
           <div style="display:flex;align-items:center;gap:8px;width:100%;">
             <span class="cc-date">${it.date.slice(5)}</span>
-            <span class="cc-name">${it.name}</span>
-            <span class="cc-amount">¥${it.amount.toLocaleString()}</span>
+            <span class="cc-name" style="flex:none;max-width:300px;">${it.name}</span>
+            <span class="cc-amount" style="flex:none;">¥${it.amount.toLocaleString()}</span>
             <span id="cc-done-${i}" style="display:none;color:var(--sage);font-size:13px;font-weight:600;">✓ 記録済</span>
           </div>
           <div style="display:flex;gap:6px;padding-left:52px;align-items:center;" id="cc-controls-${i}">
