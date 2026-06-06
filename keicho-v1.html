@@ -144,6 +144,16 @@ body { font-family: -apple-system, 'Hiragino Sans', sans-serif; background: var(
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .toast.err { background: rgba(162,45,45,0.92); }
 
+/* クレカ明細リスト */
+.cc-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+.cc-item:last-child { border-bottom: none; }
+.cc-date { font-size: 12px; color: var(--hint); width: 44px; flex-shrink: 0; }
+.cc-name { flex: 1; font-size: 13px; color: var(--ink); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cc-amount { font-size: 13px; font-weight: 500; color: var(--ink); flex-shrink: 0; width: 64px; text-align: right; }
+.cc-cat { flex-shrink: 0; }
+.cc-select { height: 34px; padding: 0 6px; border: 0.5px solid var(--border); border-radius: var(--rad-sm); background: var(--surface2); font-size: 12px; color: var(--muted); font-family: inherit; max-width: 110px; }
+.cc-select.selected { border-color: var(--sage); color: var(--sage); background: var(--sage-light); }
+
 /* iPad横向き2カラムレイアウト */
 @media (min-width: 768px) {
   .panel { padding: 1rem 1.5rem 0; }
@@ -345,6 +355,18 @@ body { font-family: -apple-system, 'Hiragino Sans', sans-serif; background: var(
           <button class="btn-submit" id="exp-btn" onclick="submitExpense()" style="margin-top:0.75rem">スプレッドシートに記録</button>
         </div>
       </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">クレカ明細 CSV 取り込み</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:0.875rem;line-height:1.6">Saison・楽天・AEONカード対応。明細を確認して事業用の行に科目を選んでください。</p>
+      <label class="receipt-zone" id="cc-zone" onclick="document.getElementById('cc-csv-in').click()">
+        <input type="file" id="cc-csv-in" accept=".csv" style="display:none" onchange="loadCCCSV(this)">
+        <div class="rz-icon">💳</div>
+        <div class="rz-text">クレカ明細CSVを選択</div>
+        <div class="rz-sub">Saison / 楽天 / AEON</div>
+      </label>
+      <div id="cc-list" style="display:none;margin-top:0.875rem"></div>
     </div>
 
     <div class="card">
@@ -832,6 +854,178 @@ function resetNumpad() {
   }
   const input = document.getElementById('exp-amount');
   if (input) input.value = '';
+}
+
+// ─── クレカ明細CSV取り込み ───────────────────────────────────
+let ccItems = [];
+
+function detectCardType(headers, firstRow) {
+  const h = headers.join(',');
+  if (h.includes('利用金額') && h.includes('手数料')) return 'rakuten';
+  if (h.includes('ご利用金額') || (firstRow && firstRow.includes('イオン'))) return 'aeon';
+  if (h.includes('利用金額')) return 'saison';
+  return 'unknown';
+}
+
+function parseAEONDate(d) {
+  // 260413 → 2026-04-13
+  const s = String(d).trim();
+  if (s.length === 6) {
+    return '20' + s.slice(0,2) + '-' + s.slice(2,4) + '-' + s.slice(4,6);
+  }
+  return s;
+}
+
+async function loadCCCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const zone = document.getElementById('cc-zone');
+  zone.innerHTML = '<span class="spinner" style="border-color:rgba(0,0,0,0.15);border-top-color:var(--sage)"></span> <span style="font-size:13px;color:var(--muted)">読み込み中...</span>';
+
+  // Shift-JISとUTF-8両方試す
+  let text = '';
+  try {
+    const buf = await file.arrayBuffer();
+    try { text = new TextDecoder('shift-jis').decode(buf); }
+    catch { text = new TextDecoder('utf-8').decode(buf); }
+  } catch(e) {
+    text = await file.text();
+  }
+
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  ccItems = [];
+
+  // カード種別を判定してパース
+  let headerLine = -1;
+  let dateIdx, nameIdx, amountIdx, cardType;
+
+  for (let i = 0; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    const joined = cols.join(',');
+    if (joined.includes('利用日') || joined.includes('ご利用日')) {
+      headerLine = i;
+      // Saison
+      if (cols.findIndex(c => c.includes('利用金額')) > -1 && cols.findIndex(c => c.includes('店名')) > -1) {
+        dateIdx = 0; nameIdx = 1; amountIdx = cols.findIndex(c => c.includes('利用金額')); cardType = 'saison';
+      }
+      // 楽天
+      else if (cols.findIndex(c => c.includes('手数料')) > -1) {
+        dateIdx = 0; nameIdx = 1; amountIdx = 4; cardType = 'rakuten';
+      }
+      // AEON
+      else if (cols.findIndex(c => c.includes('ご利用先')) > -1) {
+        dateIdx = 0; nameIdx = cols.findIndex(c => c.includes('ご利用先')); amountIdx = cols.findIndex(c => c.includes('ご利用金額')); cardType = 'aeon';
+      }
+      break;
+    }
+  }
+
+  if (headerLine < 0) { toast('明細行が見つかりませんでした', 'err'); resetCCZone(); input.value=''; return; }
+
+  for (let i = headerLine + 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    if (cols.length < 3) continue;
+    let date = (cols[dateIdx] || '').trim();
+    if (cardType === 'aeon') date = parseAEONDate(date);
+    else date = date.replace(/\//g, '-');
+    const name = (cols[nameIdx] || '').trim();
+    const amtRaw = (cols[amountIdx] || '').replace(/[",]/g, '').trim();
+    const amount = parseInt(amtRaw) || 0;
+    if (!date || !name || amount <= 0) continue;
+    // 分割払い明細などのヘッダー行をスキップ
+    if (name.includes('ご利用先') || name.includes('利用店名')) continue;
+    ccItems.push({ date, name, amount, category: '' });
+  }
+
+  if (ccItems.length === 0) { toast('データが見つかりませんでした', 'err'); resetCCZone(); input.value=''; return; }
+
+  renderCCList();
+  resetCCZone();
+  input.value = '';
+}
+
+function renderCCList() {
+  const div = document.getElementById('cc-list');
+  const catOpts = `<option value="">スキップ</option>
+<option value="消耗品費">消耗品費</option>
+<option value="交際費">交際費</option>
+<option value="旅費交通費">旅費交通費</option>
+<option value="車両費">車両費</option>
+<option value="水道光熱費">水道光熱費</option>
+<option value="通信費">通信費</option>
+<option value="研修費">研修費</option>
+<option value="図書費">図書費</option>
+<option value="教材費">教材費</option>
+<option value="租税公課">租税公課</option>
+<option value="支払手数料">支払手数料</option>
+<option value="修繕費">修繕費</option>
+<option value="保険料">保険料</option>
+<option value="仕入高">仕入高</option>
+<option value="雑費">雑費</option>`;
+
+  div.innerHTML = `
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${ccItems.length}件 — 科目を選んだ行だけ記録されます</div>
+    <div id="cc-rows">
+      ${ccItems.map((it, i) => `
+        <div class="cc-item">
+          <span class="cc-date">${it.date.slice(5)}</span>
+          <span class="cc-name">${it.name}</span>
+          <span class="cc-amount">¥${it.amount.toLocaleString()}</span>
+          <div class="cc-cat">
+            <select class="cc-select" onchange="setCCCat(${i}, this)">
+              ${catOpts}
+            </select>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <button class="btn-submit" id="cc-submit-btn" onclick="submitCCItems()" style="margin-top:0.875rem">
+      選択した行をスプレッドシートに記録
+    </button>
+  `;
+  div.style.display = 'block';
+}
+
+function setCCCat(i, el) {
+  ccItems[i].category = el.value;
+  el.className = el.value ? 'cc-select selected' : 'cc-select';
+}
+
+async function submitCCItems() {
+  const toRecord = ccItems.filter(it => it.category);
+  if (toRecord.length === 0) { toast('科目が選択されていません', 'err'); return; }
+
+  const btn = document.getElementById('cc-submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>記録中...';
+
+  let success = 0, fail = 0;
+  for (const it of toRecord) {
+    try {
+      await gasPost('addExpense', {
+        date: it.date,
+        desc: it.name,
+        amount: it.amount,
+        category: it.category,
+        item: '',
+        payment: 'クレカ',
+        debit: it.category,
+        credit: '未払費用'
+      });
+      success++;
+    } catch(e) { fail++; }
+  }
+
+  document.getElementById('cc-list').style.display = 'none';
+  ccItems = [];
+  if (fail === 0) toast(`${success}件をスプレッドシートに記録しました ✓`);
+  else toast(`${success}件成功、${fail}件失敗`, 'err');
+}
+
+function resetCCZone() {
+  const zone = document.getElementById('cc-zone');
+  zone.innerHTML = '<input type="file" id="cc-csv-in" accept=".csv" style="display:none" onchange="loadCCCSV(this)"><div class="rz-icon">💳</div><div class="rz-text">クレカ明細CSVを選択</div><div class="rz-sub">Saison / 楽天 / AEON</div>';
+  zone.onclick = () => document.getElementById('cc-csv-in').click();
 }
 
 // ─── Amazon CSV取り込み ──────────────────────────────────────
