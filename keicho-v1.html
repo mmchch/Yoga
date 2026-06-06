@@ -882,15 +882,28 @@ async function loadCCCSV(input) {
   const zone = document.getElementById('cc-zone');
   zone.innerHTML = '<span class="spinner" style="border-color:rgba(0,0,0,0.15);border-top-color:var(--sage)"></span> <span style="font-size:13px;color:var(--muted)">読み込み中...</span>';
 
-  // Shift-JISとUTF-8両方試す
+  // 文字コード自動判定（Shift-JIS / UTF-8）
   let text = '';
   try {
     const buf = await file.arrayBuffer();
-    try { text = new TextDecoder('shift-jis').decode(buf); }
-    catch { text = new TextDecoder('utf-8').decode(buf); }
+    const uint8 = new Uint8Array(buf);
+    // Shift-JIS判定：0x80以上のバイトが含まれているか
+    const hasHighByte = uint8.some(b => b > 0x7F);
+    if (hasHighByte) {
+      try {
+        const decoder = new TextDecoder('shift-jis');
+        text = decoder.decode(buf);
+      } catch(e) {
+        try { text = new TextDecoder('utf-8').decode(buf); }
+        catch { text = await file.text(); }
+      }
+    } else {
+      text = new TextDecoder('utf-8').decode(buf);
+    }
   } catch(e) {
     text = await file.text();
   }
+  if (!text || text.length < 10) { toast('ファイルの読み込みに失敗しました', 'err'); resetCCZone(); input.value=''; return; }
 
   const lines = text.split(/\r?\n/).filter(l => l.trim());
   ccItems = [];
