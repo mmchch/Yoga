@@ -994,30 +994,31 @@ function renderCCList() {
 <option value="雑費">雑費</option>`;
 
   div.innerHTML = `
-    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${ccItems.length}件 — 科目を選んだ行だけ記録されます</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${ccItems.length}件 — 科目を選んで1行ずつ記録できます</div>
     <div id="cc-rows">
       ${ccItems.map((it, i) => `
-        <div class="cc-item" style="flex-wrap:wrap;gap:6px;">
+        <div class="cc-item" id="cc-row-${i}" style="flex-wrap:wrap;gap:6px;padding:10px 0;">
           <div style="display:flex;align-items:center;gap:8px;width:100%;">
             <span class="cc-date">${it.date.slice(5)}</span>
             <span class="cc-name">${it.name}</span>
             <span class="cc-amount">¥${it.amount.toLocaleString()}</span>
+            <span id="cc-done-${i}" style="display:none;color:var(--sage);font-size:13px;font-weight:600;">✓ 記録済</span>
           </div>
-          <div style="display:flex;gap:6px;padding-left:52px;">
+          <div style="display:flex;gap:6px;padding-left:52px;align-items:center;" id="cc-controls-${i}">
             <select class="cc-select" onchange="setCCCat(${i}, this)">
               ${catOpts}
             </select>
             <select class="cc-select" id="cc-item-${i}" onchange="setCCItem(${i}, this)" style="display:none">
               <option value="">品目を選ぶ</option>
             </select>
+            <button onclick="recordOneCCItem(${i})" id="cc-rec-btn-${i}" style="height:34px;padding:0 10px;background:var(--sage);color:white;border:none;border-radius:var(--rad-sm);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;flex-shrink:0;">記録</button>
           </div>
         </div>
       `).join('')}
     </div>
-    <button class="btn-submit" id="cc-submit-btn" onclick="submitCCItems()" style="margin-top:0.875rem">
-      選択した行をスプレッドシートに記録
-    </button>
+    <div style="font-size:12px;color:var(--hint);text-align:center;padding:0.75rem 0" id="cc-progress"></div>
   `;
+  updateCCProgress();
   div.style.display = 'block';
 }
 
@@ -1043,36 +1044,50 @@ function setCCItem(i, el) {
   el.className = el.value ? 'cc-select selected' : 'cc-select';
 }
 
-async function submitCCItems() {
-  const toRecord = ccItems.filter(it => it.category);
-  if (toRecord.length === 0) { toast('科目が選択されていません', 'err'); return; }
-
-  const btn = document.getElementById('cc-submit-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>記録中...';
-
-  let success = 0, fail = 0;
-  for (const it of toRecord) {
-    try {
-      await gasPost('addExpense', {
-        date: it.date,
-        desc: it.name,
-        amount: it.amount,
-        category: it.category,
-        item: it.item || '',
-        payment: 'クレカ',
-        debit: it.category,
-        credit: '未払費用'
-      });
-      success++;
-    } catch(e) { fail++; }
-  }
-
-  document.getElementById('cc-list').style.display = 'none';
-  ccItems = [];
-  if (fail === 0) toast(`${success}件をスプレッドシートに記録しました ✓`);
-  else toast(`${success}件成功、${fail}件失敗`, 'err');
+function updateCCProgress() {
+  const done = ccItems.filter(it => it.recorded).length;
+  const total = ccItems.length;
+  const el = document.getElementById('cc-progress');
+  if (el) el.textContent = done > 0 ? `${done} / ${total} 件記録済み` : '';
 }
+
+async function recordOneCCItem(i) {
+  const it = ccItems[i];
+  if (!it.category) { toast('科目を選んでください', 'err'); return; }
+  
+  const btn = document.getElementById('cc-rec-btn-' + i);
+  btn.disabled = true;
+  btn.textContent = '...';
+  
+  try {
+    await gasPost('addExpense', {
+      date: it.date,
+      desc: it.name,
+      amount: it.amount,
+      category: it.category,
+      item: it.item || '',
+      payment: 'クレカ',
+      debit: it.category,
+      credit: '未払費用'
+    });
+    // 記録済みにする
+    ccItems[i].recorded = true;
+    const row = document.getElementById('cc-row-' + i);
+    const controls = document.getElementById('cc-controls-' + i);
+    const done = document.getElementById('cc-done-' + i);
+    if (row) row.style.opacity = '0.45';
+    if (controls) controls.style.display = 'none';
+    if (done) done.style.display = 'inline';
+    updateCCProgress();
+    toast('記録しました ✓');
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '記録';
+    toast('通信エラー。再試行してください', 'err');
+  }
+}
+
+
 
 function resetCCZone() {
   const zone = document.getElementById('cc-zone');
