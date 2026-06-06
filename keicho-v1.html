@@ -360,12 +360,12 @@ body { font-family: -apple-system, 'Hiragino Sans', sans-serif; background: var(
     <div class="card">
       <div class="card-label">クレカ明細 CSV 取り込み</div>
       <p style="font-size:13px;color:var(--muted);margin-bottom:0.875rem;line-height:1.6">Saison・楽天・AEONカード対応。明細を確認して事業用の行に科目を選んでください。</p>
-      <label class="receipt-zone" id="cc-zone" onclick="document.getElementById('cc-csv-in').click()">
-        <input type="file" id="cc-csv-in" accept=".csv" style="display:none" onchange="loadCCCSV(this)">
+      <input type="file" id="cc-csv-in" accept=".csv" style="display:none">
+      <button class="receipt-zone" id="cc-zone" onclick="document.getElementById('cc-csv-in').click()">
         <div class="rz-icon">💳</div>
         <div class="rz-text">クレカ明細CSVを選択</div>
         <div class="rz-sub">Saison / 楽天 / AEON</div>
-      </label>
+      </button>
       <div id="cc-list" style="display:none;margin-top:0.875rem"></div>
     </div>
 
@@ -437,6 +437,11 @@ window.addEventListener('DOMContentLoaded', () => {
   initDateSelect('eng-date');
   initDateSelect('exp-date');
   updateItemTags('消耗品費');
+  // クレカCSVのイベントリスナー
+  document.getElementById('cc-csv-in').addEventListener('change', function() { loadCCCSV(this); });
+  // AmazonCSVのイベントリスナー
+  const amazonIn = document.getElementById('amazon-csv-in');
+  if (amazonIn) amazonIn.addEventListener('change', function() { importAmazonCSV(this); });
   updateSyncStatus();
   if (!GAS_URL) showModal();
 });
@@ -1046,8 +1051,7 @@ async function submitCCItems() {
 
 function resetCCZone() {
   const zone = document.getElementById('cc-zone');
-  zone.innerHTML = '<input type="file" id="cc-csv-in" accept=".csv" style="display:none" onchange="loadCCCSV(this)"><div class="rz-icon">💳</div><div class="rz-text">クレカ明細CSVを選択</div><div class="rz-sub">Saison / 楽天 / AEON</div>';
-  zone.onclick = () => document.getElementById('cc-csv-in').click();
+  zone.innerHTML = '<div class="rz-icon">💳</div><div class="rz-text">クレカ明細CSVを選択</div><div class="rz-sub">Saison / 楽天 / AEON</div>';
 }
 
 // ─── Amazon CSV取り込み ──────────────────────────────────────
