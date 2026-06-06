@@ -310,6 +310,15 @@ body { font-family: -apple-system, 'Hiragino Sans', sans-serif; background: var(
             <div class="tags" id="item-tags" style="margin-bottom:8px"></div>
             <input type="text" id="exp-item" placeholder="その他・直接入力">
           </div>
+          <div class="field">
+            <label>支払方法</label>
+            <div class="tags" id="exp-payment-tags">
+              <button class="tag sel" onclick="pickTag(this)">現金</button>
+              <button class="tag" onclick="pickTag(this)">PayPay</button>
+              <button class="tag" onclick="pickTag(this)">クレカ</button>
+              <button class="tag" onclick="pickTag(this)">振込</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="expense-right">
@@ -594,13 +603,16 @@ async function submitExpense() {
   const amount = parseInt(document.getElementById('exp-amount').value);
   const category = selectedTag('cat-tags');
   const item = document.getElementById('exp-item').value.trim();
+  const payment = selectedTag('exp-payment-tags');
+  const creditMap = { '現金':'現金', 'PayPay':'現金', 'クレカ':'未払金', '振込':'普通預金' };
+  const credit = creditMap[payment] || '現金';
   if (!date || !amount) { toast('日付・金額を入力してください', 'err'); return; }
 
   const btn = document.getElementById('exp-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>送信中...';
   try {
-    await gasPost('addExpense', { date, desc, amount, category, item });
+    await gasPost('addExpense', { date, desc, amount, category, item, payment, debit: category, credit });
     document.getElementById('exp-desc').value = '';
     document.getElementById('exp-item').value = '';
     resetNumpad();
