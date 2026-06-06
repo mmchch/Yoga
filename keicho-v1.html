@@ -1175,51 +1175,121 @@ async function importAmazonCSV(input) {
   }
 
   if (items.length === 0) {
-    toast('取り込める事業用データがありませんでした', 'err');
+    toast('取り込めるデータがありませんでした', 'err');
     resetAmazonZone();
     input.value = '';
     return;
   }
 
-  // プレビュー表示
+  // クレカと同じ1行ずつ記録形式で表示
   const resultDiv = document.getElementById('amazon-result');
+  const catOpts = `<option value="">スキップ</option>
+<option value="消耗品費">消耗品費</option>
+<option value="交際費">交際費</option>
+<option value="旅費交通費">旅費交通費</option>
+<option value="車両費">車両費</option>
+<option value="水道光熱費">水道光熱費</option>
+<option value="通信費">通信費</option>
+<option value="研修費">研修費</option>
+<option value="図書費">図書費</option>
+<option value="教材費">教材費</option>
+<option value="租税公課">租税公課</option>
+<option value="支払手数料">支払手数料</option>
+<option value="修繕費">修繕費</option>
+<option value="保険料">保険料</option>
+<option value="仕入高">仕入高</option>
+<option value="雑費">雑費</option>`;
+
   resultDiv.innerHTML = `
-    <div class="ai-box" style="margin-top:0.875rem">
-      <div class="ai-box-label">${items.length}件を取り込みます</div>
-      ${items.slice(0, 5).map(it => `
-        <div class="ai-row"><span>${it.date}</span><span style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.desc}</span><span>¥${it.amount.toLocaleString()}</span></div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${items.length}件 — 科目を選んで1行ずつ記録できます（個人用はスキップ）</div>
+    <div id="amazon-rows">
+      ${items.map((it, i) => `
+        <div class="cc-item" id="az-row-${i}" style="flex-wrap:wrap;gap:6px;padding:10px 0;">
+          <div style="display:flex;align-items:center;gap:8px;width:100%;">
+            <span class="cc-date">${it.date.slice(5)}</span>
+            <span class="cc-name" style="flex:none;max-width:300px;">${it.desc}</span>
+            <span class="cc-amount" style="flex:none;">¥${it.amount.toLocaleString()}</span>
+            <span id="az-done-${i}" style="display:none;color:var(--sage);font-size:13px;font-weight:600;">✓ 記録済</span>
+          </div>
+          <div style="display:flex;gap:6px;padding-left:52px;align-items:center;" id="az-controls-${i}">
+            <select class="cc-select" onchange="setAZCat(${i}, this)">
+              ${catOpts}
+            </select>
+            <select class="cc-select" id="az-item-${i}" onchange="setAZItem(${i}, this)" style="display:none">
+              <option value="">品目を選ぶ</option>
+            </select>
+            <button onclick="recordOneAZItem(${i})" id="az-rec-btn-${i}" style="height:34px;padding:0 10px;background:var(--sage);color:white;border:none;border-radius:var(--rad-sm);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;flex-shrink:0;">記録</button>
+          </div>
+        </div>
       `).join('')}
-      ${items.length > 5 ? `<div style="font-size:11px;color:var(--hint);text-align:center;margin-top:4px">他${items.length - 5}件...</div>` : ''}
     </div>
-    <button class="btn-submit" id="amazon-import-btn" onclick="executeAmazonImport()" style="margin-top:0.75rem">スプレッドシートに記録</button>
+    <div style="font-size:12px;color:var(--hint);text-align:center;padding:0.75rem 0" id="az-progress"></div>
   `;
   resultDiv.style.display = 'block';
   resultDiv._items = items;
+  updateAZProgress();
   resetAmazonZone();
   input.value = '';
 }
 
-async function executeAmazonImport() {
-  const resultDiv = document.getElementById('amazon-result');
-  const items = resultDiv._items;
-  const btn = document.getElementById('amazon-import-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>記録中...';
+function updateAZProgress() {
+  const items = document.getElementById('amazon-result')._items || [];
+  const done = items.filter(it => it.recorded).length;
+  const el = document.getElementById('az-progress');
+  if (el && done > 0) el.textContent = done + ' / ' + items.length + ' 件記録済み';
+}
 
-  let success = 0, fail = 0;
-  for (const item of items) {
-    try {
-      await gasPost('addExpense', { ...item, payment: 'クレカ', debit: item.category, credit: '未払費用' });
-      success++;
-    } catch(e) {
-      fail++;
-    }
-  }
-  resultDiv.style.display = 'none';
-  if (fail === 0) {
-    toast(`${success}件をスプレッドシートに記録しました ✓`);
-  } else {
-    toast(`${success}件成功、${fail}件失敗`, 'err');
+function setAZCat(i, el) {
+  const items = document.getElementById('amazon-result')._items;
+  items[i].category = el.value;
+  items[i].item = '';
+  el.className = el.value ? 'cc-select selected' : 'cc-select';
+  const itemSel = document.getElementById('az-item-' + i);
+  if (!itemSel) return;
+  if (!el.value) { itemSel.style.display = 'none'; return; }
+  const its = ITEMS_BY_CAT[el.value] || ['その他'];
+  itemSel.innerHTML = '<option value="">品目を選ぶ</option>' + its.map(it => `<option value="${it}">${it}</option>`).join('');
+  itemSel.style.display = 'block';
+  itemSel.className = 'cc-select';
+}
+
+function setAZItem(i, el) {
+  const items = document.getElementById('amazon-result')._items;
+  items[i].item = el.value === 'その他' ? '' : el.value;
+  el.className = el.value ? 'cc-select selected' : 'cc-select';
+}
+
+async function recordOneAZItem(i) {
+  const items = document.getElementById('amazon-result')._items;
+  const it = items[i];
+  if (!it.category) { toast('科目を選んでください', 'err'); return; }
+  const btn = document.getElementById('az-rec-btn-' + i);
+  btn.disabled = true;
+  btn.textContent = '...';
+  try {
+    await gasPost('addExpense', {
+      date: it.date,
+      desc: it.desc,
+      amount: it.amount,
+      category: it.category,
+      item: it.item || '',
+      payment: 'クレカ',
+      debit: it.category,
+      credit: '未払費用'
+    });
+    items[i].recorded = true;
+    const row = document.getElementById('az-row-' + i);
+    const controls = document.getElementById('az-controls-' + i);
+    const done = document.getElementById('az-done-' + i);
+    if (row) row.style.opacity = '0.45';
+    if (controls) controls.style.display = 'none';
+    if (done) done.style.display = 'inline';
+    updateAZProgress();
+    toast('記録しました ✓');
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '記録';
+    toast('通信エラー。再試行してください', 'err');
   }
 }
 
