@@ -908,7 +908,11 @@ async function loadCCCSV(input) {
   }
   if (!text || text.length < 10) { toast('ファイルの読み込みに失敗しました', 'err'); resetCCZone(); input.value=''; return; }
 
+  console.log('text length:', text.length);
+  console.log('first 200 chars:', text.slice(0, 200));
+  
   const lines = text.split(/\r?\n/).filter(l => l.trim());
+  console.log('total lines:', lines.length);
   ccItems = [];
 
   // カード種別を判定してパース
@@ -945,6 +949,7 @@ async function loadCCCSV(input) {
     }
   }
 
+  console.log('headerLine:', headerLine, 'cardType:', cardType, 'dateIdx:', dateIdx, 'nameIdx:', nameIdx, 'amountIdx:', amountIdx);
   if (headerLine < 0) { toast('明細行が見つかりませんでした', 'err'); resetCCZone(); input.value=''; return; }
 
   for (let i = headerLine + 1; i < lines.length; i++) {
