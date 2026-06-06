@@ -904,17 +904,26 @@ async function loadCCCSV(input) {
     const joined = cols.join(',');
     if (joined.includes('利用日') || joined.includes('ご利用日')) {
       headerLine = i;
-      // Saison
-      if (cols.findIndex(c => c.includes('利用金額')) > -1 && cols.findIndex(c => c.includes('店名')) > -1) {
-        dateIdx = 0; nameIdx = 1; amountIdx = cols.findIndex(c => c.includes('利用金額')); cardType = 'saison';
-      }
-      // 楽天
-      else if (cols.findIndex(c => c.includes('手数料')) > -1) {
+      const hasTesuryou = cols.some(c => c.includes('手数料'));
+      const hasGoriyouSaki = cols.some(c => c.includes('ご利用先'));
+      const hasGoriyouKingaku = cols.some(c => c.includes('ご利用金額'));
+      const hasRiyouKingaku = cols.some(c => c.includes('利用金額'));
+      const hasShopName = cols.some(c => c.includes('店名') || c.includes('商品名'));
+
+      if (hasTesuryou) {
+        // 楽天: 利用日,利用店名・商品名,利用者,支払方法,利用金額,...
         dateIdx = 0; nameIdx = 1; amountIdx = 4; cardType = 'rakuten';
-      }
-      // AEON
-      else if (cols.findIndex(c => c.includes('ご利用先')) > -1) {
-        dateIdx = 0; nameIdx = cols.findIndex(c => c.includes('ご利用先')); amountIdx = cols.findIndex(c => c.includes('ご利用金額')); cardType = 'aeon';
+      } else if (hasGoriyouSaki && hasGoriyouKingaku) {
+        // AEON: ご利用日,利用者区分,ご利用先,...,ご利用金額
+        dateIdx = 0;
+        nameIdx = cols.findIndex(c => c.includes('ご利用先'));
+        amountIdx = cols.findIndex(c => c.includes('ご利用金額'));
+        cardType = 'aeon';
+      } else if (hasRiyouKingaku) {
+        // Saison: 利用日,ご利用店名及び商品名,...,利用金額
+        dateIdx = 0; nameIdx = 1;
+        amountIdx = cols.findIndex(c => c.includes('利用金額'));
+        cardType = 'saison';
       }
       break;
     }
