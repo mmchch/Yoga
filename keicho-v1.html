@@ -997,13 +997,18 @@ function renderCCList() {
     <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${ccItems.length}件 — 科目を選んだ行だけ記録されます</div>
     <div id="cc-rows">
       ${ccItems.map((it, i) => `
-        <div class="cc-item">
-          <span class="cc-date">${it.date.slice(5)}</span>
-          <span class="cc-name">${it.name}</span>
-          <span class="cc-amount">¥${it.amount.toLocaleString()}</span>
-          <div class="cc-cat">
+        <div class="cc-item" style="flex-wrap:wrap;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;width:100%;">
+            <span class="cc-date">${it.date.slice(5)}</span>
+            <span class="cc-name">${it.name}</span>
+            <span class="cc-amount">¥${it.amount.toLocaleString()}</span>
+          </div>
+          <div style="display:flex;gap:6px;padding-left:52px;">
             <select class="cc-select" onchange="setCCCat(${i}, this)">
               ${catOpts}
+            </select>
+            <select class="cc-select" id="cc-item-${i}" onchange="setCCItem(${i}, this)" style="display:none">
+              <option value="">品目を選ぶ</option>
             </select>
           </div>
         </div>
@@ -1018,6 +1023,23 @@ function renderCCList() {
 
 function setCCCat(i, el) {
   ccItems[i].category = el.value;
+  ccItems[i].item = '';
+  el.className = el.value ? 'cc-select selected' : 'cc-select';
+  
+  // 品目セレクトを更新
+  const itemSel = document.getElementById('cc-item-' + i);
+  if (!itemSel) return;
+  if (!el.value) { itemSel.style.display = 'none'; return; }
+  
+  const items = ITEMS_BY_CAT[el.value] || ['その他'];
+  itemSel.innerHTML = '<option value="">品目を選ぶ</option>' + 
+    items.map(it => `<option value="${it}">${it}</option>`).join('');
+  itemSel.style.display = 'block';
+  itemSel.className = 'cc-select';
+}
+
+function setCCItem(i, el) {
+  ccItems[i].item = el.value === 'その他' ? '' : el.value;
   el.className = el.value ? 'cc-select selected' : 'cc-select';
 }
 
@@ -1037,7 +1059,7 @@ async function submitCCItems() {
         desc: it.name,
         amount: it.amount,
         category: it.category,
-        item: '',
+        item: it.item || '',
         payment: 'クレカ',
         debit: it.category,
         credit: '未払費用'
@@ -1215,6 +1237,22 @@ async function writeAnnualSheets() {
   }
   btn.disabled = false;
   btn.innerHTML = '📊 スプレッドシートに集計シートを作成';
+}
+
+// ─── 仕訳帳同期 ──────────────────────────────────────────────
+async function syncJournal() {
+  const btn = document.getElementById('sync-journal-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="border-color:rgba(74,124,89,0.3);border-top-color:var(--sage)"></span> 更新中...';
+  try {
+    const d = await gasGet({ action: 'syncToJournal' });
+    if (!d.ok) throw new Error(d.error);
+    toast(`仕訳帳を更新しました（${d.count}件）✓`);
+  } catch(e) {
+    toast('更新に失敗しました: ' + e.message, 'err');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '🔄 仕訳帳を最新データで更新';
 }
 
 // ─── 総勘定元帳生成 ──────────────────────────────────────────
