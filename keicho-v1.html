@@ -604,7 +604,7 @@ async function submitExpense() {
   const category = selectedTag('cat-tags');
   const item = document.getElementById('exp-item').value.trim();
   const payment = selectedTag('exp-payment-tags');
-  const creditMap = { '現金':'現金', 'PayPay':'現金', 'クレカ':'未払金', '振込':'普通預金' };
+  const creditMap = { '現金':'現金', 'PayPay':'現金', 'クレカ':'未払費用', '振込':'普通預金' };
   const credit = creditMap[payment] || '現金';
   if (!date || !amount) { toast('日付・金額を入力してください', 'err'); return; }
 
@@ -992,6 +992,22 @@ async function writeAnnualSheets() {
   }
   btn.disabled = false;
   btn.innerHTML = '📊 スプレッドシートに集計シートを作成';
+}
+
+// ─── 総勘定元帳生成 ──────────────────────────────────────────
+async function writeGeneralLedger() {
+  const btn = document.getElementById('write-ledger-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="border-color:rgba(74,124,89,0.3);border-top-color:var(--sage)"></span> 作成中...';
+  try {
+    const d = await gasGet({ action: 'writeGeneralLedger', year: annualYear });
+    if (!d.ok) throw new Error(d.error);
+    toast(`${annualYear}年の総勘定元帳をスプレッドシートに作成しました ✓`);
+  } catch(e) {
+    toast('作成に失敗しました: ' + e.message, 'err');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '📒 総勘定元帳を作成';
 }
 
 // ─── Toast ───────────────────────────────────────────────────
