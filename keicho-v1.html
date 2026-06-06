@@ -1178,7 +1178,7 @@ async function executeAmazonImport() {
   let success = 0, fail = 0;
   for (const item of items) {
     try {
-      await gasPost('addExpense', item);
+      await gasPost('addExpense', { ...item, payment: 'クレカ', debit: item.category, credit: '未払費用' });
       success++;
     } catch(e) {
       fail++;
