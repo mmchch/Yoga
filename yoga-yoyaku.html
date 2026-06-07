@@ -488,6 +488,13 @@
   📲 予約の前に <a href="https://lin.ee/VMsTeFw" target="_blank">LINE公式アカウントを友だち追加</a> してください（キャンセル連絡もLINEで）
 </div>
 
+<div style="background:#f0f5f3; text-align:center; padding:0.7rem 1rem; display:flex; align-items:center; justify-content:center; gap:0.8rem; flex-wrap:wrap;">
+  <span style="font-size:0.78rem; color:#4a7c6f;">キャンセルのご連絡は</span>
+  <a href="https://lin.ee/VMsTeFw" target="_blank" style="display:inline-flex; align-items:center; gap:0.4rem; background:#06c755; color:white; border-radius:8px; padding:0.4rem 1rem; font-size:0.78rem; font-weight:700; text-decoration:none;">
+    💬 LINEで連絡する
+  </a>
+</div>
+
 <main>
 
   <!-- ステップ -->
@@ -595,6 +602,7 @@
           ${isFull ? '<span class="class-badge badge-full">満員</span>' : ''}
         </div>
         <div class="class-datetime">${cls.datetime}</div>
+        ${cls.deadline ? `<div style="font-size:0.7rem; color:var(--text-light); margin-top:0.3rem;">締め切り：${cls.deadline}まで</div>` : ''}
       `;
 
       if (!isFull) {
