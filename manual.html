@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>予約システム 運用マニュアル</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-deep: #2d4a3e;
+    --green-mid: #4a7c6f;
+    --green-light: #8db5a7;
+    --cream: #f7f3ee;
+    --warm: #e8dfd4;
+    --text: #2a2a2a;
+    --text-light: #6b7168;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Zen Kaku Gothic New', sans-serif; background: var(--cream); color: var(--text); }
+
+  header {
+    background: var(--green-deep);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  header h1 { font-size: 1.3rem; font-weight: 300; letter-spacing: 0.1em; }
+  header p { font-size: 0.75rem; color: var(--green-light); margin-top: 0.4rem; }
+
+  main { max-width: 680px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+  .section { margin-bottom: 2rem; }
+
+  .section-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--green-mid);
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--green-light);
+    opacity: 0.3;
+  }
+
+  .card {
+    background: white;
+    border: 1.5px solid var(--warm);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .tag {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+  .tag-auto { background: #e8f4ef; color: var(--green-mid); }
+  .tag-manual { background: #fef3e2; color: #c47a1a; }
+
+  .card h3 { font-size: 0.9rem; font-weight: 700; color: var(--green-deep); }
+
+  .card p, .card li {
+    font-size: 0.82rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  ol, ul { padding-left: 1.2rem; margin-top: 0.4rem; }
+
+  .highlight {
+    background: #f0f5f3;
+    border-left: 3px solid var(--green-deep);
+    border-radius: 0 8px 8px 0;
+    padding: 0.6rem 1rem;
+    font-size: 0.78rem;
+    color: var(--text);
+    margin-top: 0.6rem;
+    line-height: 1.7;
+  }
+
+  .links { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .link-row {
+    background: white;
+    border: 1.5px solid var(--warm);
+    border-radius: 10px;
+    padding: 0.8rem 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .link-row span { font-size: 0.85rem; font-weight: 700; color: var(--green-deep); }
+  .link-row a { font-size: 0.75rem; color: var(--green-mid); text-decoration: none; word-break: break-all; }
+  .link-row a:hover { text-decoration: underline; }
+
+  .note {
+    background: #fef9f0;
+    border: 1px solid #f0d9b0;
+    border-radius: 10px;
+    padding: 0.8rem 1.2rem;
+    font-size: 0.78rem;
+    color: #7a5a30;
+    line-height: 1.8;
+    margin-top: 1rem;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 0.68rem;
+    color: var(--text-light);
+    padding: 1.5rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>予約システム 運用マニュアル</h1>
+  <p>自然のめぐみ・セルフケア🌱ヨガ教室　最終更新：2026年6月</p>
+</header>
+
+<main>
+
+  <!-- 毎月の作業 -->
+  <div class="section">
+    <p class="section-title">毎月の作業</p>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="tag tag-auto">自動</span>
+        <h3>毎月20日：翌月の日程が自動生成される</h3>
+      </div>
+      <p>GASが自動実行され、スプレッドシートの「クラス管理」シートに翌月分が追加されます。何もしなくてOK。</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="tag tag-manual">手動</span>
+        <h3>20日以降：お休みのクラスに「×」をつける</h3>
+      </div>
+      <p>スプレッドシート「クラス管理」のF列（開講）の「○」を「×」に変更。すぐ予約ページに反映されます。</p>
+      <div class="highlight">スプレッドシート → クラス管理シート → F列の「○」→「×」に変更するだけ</div>
+    </div>
+  </div>
+
+  <!-- 予約が入ったとき -->
+  <div class="section">
+    <p class="section-title">予約が入ったとき</p>
+
+    <div class="card">
+      <p>スプレッドシート「予約管理」シートに自動記録されます。確認はここを見るだけでOK。</p>
+      <div class="highlight">
+        A列：予約日時　B列：クラス名　C列：名前　D列：ステータス
+      </div>
+      <p style="margin-top:0.6rem;">キャンセルが来たらD列の「予約済み」を「キャンセル」に変更すると定員が戻ります。</p>
+    </div>
+  </div>
+
+  <!-- GASを変更したとき -->
+  <div class="section">
+    <p class="section-title">GASを変更したとき（クラス追加・定員変更など）</p>
+
+    <div class="card">
+      <ol>
+        <li>Apps Scriptでコードを編集・保存（Ctrl+S）</li>
+        <li>「デプロイ」→「デプロイを管理」をクリック</li>
+        <li>鉛筆アイコン → バージョンを「新しいバージョン」に変更</li>
+        <li>「デプロイ」をクリック</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- 重要リンク -->
+  <div class="section">
+    <p class="section-title">重要リンク</p>
+
+    <div class="links">
+      <div class="link-row">
+        <span>予約ページ（生徒用）</span>
+        <a href="https://mmchch.github.io/Yoga/yoga-yoyaku.html" target="_blank">https://mmchch.github.io/Yoga/yoga-yoyaku.html</a>
+      </div>
+      <div class="link-row">
+        <span>スプレッドシート</span>
+        <a href="https://docs.google.com/spreadsheets/d/1JoMNUqSgPD5wNP-1u9bMt7Utiq_rqkTXtz_JOWxOB2k/edit" target="_blank">ヨガ予約管理を開く</a>
+      </div>
+      <div class="link-row">
+        <span>Apps Script（GAS）</span>
+        <a href="https://script.google.com" target="_blank">script.google.com</a>
+      </div>
+      <div class="link-row">
+        <span>LINE公式アカウント管理</span>
+        <a href="https://manager.line.biz" target="_blank">manager.line.biz</a>
+      </div>
+      <div class="link-row">
+        <span>GitHub リポジトリ</span>
+        <a href="https://github.com/mmchch/Yoga" target="_blank">github.com/mmchch/Yoga</a>
+      </div>
+    </div>
+
+    <div class="note">
+      ⚠️ GASのWebアプリURL・LINE Channel access token・スプレッドシートIDはApps Scriptのコード冒頭に記載。公開しないよう注意。
+    </div>
+  </div>
+
+</main>
+
+<footer>自然のめぐみ・セルフケア🌱ヨガ教室 · 佐賀市金立町</footer>
+
+</body>
+</html>
