@@ -587,23 +587,14 @@
       const isFull = cls.available <= 0;
       const isFew = !isFull && cls.available <= 2;
 
-      let badgeClass, badgeText, fillClass;
-      if (isFull) { badgeClass = 'badge-full'; badgeText = '満員'; fillClass = 'fill-full'; }
-      else if (isFew) { badgeClass = 'badge-few'; badgeText = '残りわずか'; fillClass = 'fill-few'; }
-      else { badgeClass = 'badge-ok'; badgeText = '予約可'; fillClass = 'fill-ok'; }
-
       const card = document.createElement('div');
       card.className = `class-card${isFull ? ' full' : ''}`;
       card.innerHTML = `
         <div class="class-header">
           <div class="class-name">${cls.name}</div>
-          <span class="class-badge ${badgeClass}">${badgeText}</span>
+          ${isFull ? '<span class="class-badge badge-full">満員</span>' : ''}
         </div>
         <div class="class-datetime">${cls.datetime}</div>
-        <div class="class-capacity-bar">
-          <div class="capacity-fill ${fillClass}" style="width:${Math.min(ratio*100,100)}%"></div>
-        </div>
-        <div class="capacity-text">${cls.reserved} / ${cls.capacity} 名</div>
       `;
 
       if (!isFull) {
