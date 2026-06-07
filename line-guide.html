@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>予約の始め方 | 自然のめぐみ・セルフケア</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-deep: #2d4a3e;
+    --green-mid: #4a7c6f;
+    --green-light: #8db5a7;
+    --cream: #f7f3ee;
+    --warm: #e8dfd4;
+    --accent: #c4956a;
+    --text: #2a2a2a;
+    --text-light: #6b7168;
+    --line-green: #06c755;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--green-deep);
+    color: white;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+  }
+
+  .header-en {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    letter-spacing: 0.2em;
+    color: var(--green-light);
+    margin-bottom: 0.5rem;
+  }
+
+  header h1 {
+    font-size: 1.3rem;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+  }
+
+  header p {
+    font-size: 0.75rem;
+    color: var(--green-light);
+    margin-top: 0.5rem;
+    font-weight: 300;
+  }
+
+  main {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  /* 導入文 */
+  .intro {
+    background: white;
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.5rem;
+    border: 1.5px solid var(--warm);
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--text-light);
+  }
+
+  .intro strong {
+    color: var(--green-deep);
+    font-weight: 700;
+  }
+
+  /* ステップカード */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .step-card {
+    background: white;
+    border-radius: 14px;
+    border: 1.5px solid var(--warm);
+    overflow: hidden;
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.9rem 1.2rem;
+    background: #f9f6f2;
+    border-bottom: 1px solid var(--warm);
+  }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    background: var(--green-deep);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .step-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--green-deep);
+  }
+
+  .step-body {
+    padding: 1rem 1.2rem;
+    font-size: 0.82rem;
+    line-height: 1.85;
+    color: var(--text-light);
+  }
+
+  .step-body strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  /* LINEボタン風 */
+  .line-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    background: var(--line-green);
+    color: white;
+    border-radius: 10px;
+    padding: 0.9rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 0.8rem 0 0.2rem;
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: opacity 0.2s;
+  }
+
+  .line-btn:hover { opacity: 0.88; }
+
+  .line-icon {
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--line-green);
+    font-weight: 900;
+  }
+
+  /* 操作手順 */
+  .substeps {
+    list-style: none;
+    margin-top: 0.6rem;
+  }
+
+  .substeps li {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.4rem 0;
+    font-size: 0.82rem;
+    color: var(--text-light);
+    border-bottom: 1px dashed rgba(0,0,0,0.06);
+    align-items: flex-start;
+  }
+
+  .substeps li:last-child { border-bottom: none; }
+
+  .substep-num {
+    background: var(--green-light);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ハイライトボックス */
+  .highlight {
+    background: #f0f5f3;
+    border-left: 3px solid var(--green-deep);
+    border-radius: 0 8px 8px 0;
+    padding: 0.7rem 1rem;
+    margin: 0.7rem 0;
+    font-size: 0.82rem;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .highlight .label {
+    font-size: 0.65rem;
+    color: var(--green-mid);
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+
+  /* 予約ページへのボタン */
+  .reserve-btn {
+    display: block;
+    background: var(--green-deep);
+    color: white;
+    text-align: center;
+    border-radius: 12px;
+    padding: 1.1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    margin-top: 1.5rem;
+    transition: all 0.2s;
+  }
+
+  .reserve-btn:hover {
+    background: var(--green-mid);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(45,74,62,0.2);
+  }
+
+  /* 注意書き */
+  .note {
+    background: #fef9f0;
+    border: 1px solid #f0d9b0;
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    margin-top: 1.2rem;
+    font-size: 0.78rem;
+    color: #7a5a30;
+    line-height: 1.8;
+  }
+
+  .note-title {
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 0.68rem;
+    color: var(--text-light);
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="header-en">How to Reserve</p>
+  <h1>予約の始め方</h1>
+  <p>2ステップで簡単にご予約いただけます</p>
+</header>
+
+<main>
+
+  <div class="intro">
+    クラスのご予約は<strong>お名前を入力するだけ</strong>で完了します。<br>
+    まず最初に、LINEの友だち追加をお願いします。キャンセル連絡などにご利用いただけます。
+  </div>
+
+  <div class="steps">
+
+    <!-- STEP 1 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-num">1</div>
+        <div class="step-title">LINEで友だち追加する</div>
+      </div>
+      <div class="step-body">
+        下のボタンから「自然のめぐみ・セルフケア🌱ヨガ教室」の<br>
+        LINE公式アカウントを友だち追加してください。
+        <a class="line-btn" href="https://lin.ee/VMsTeFw" target="_blank">
+          <span class="line-icon">L</span>
+          友だち追加する
+        </a>
+        <p style="font-size:0.72rem; color:var(--text-light); text-align:center;">
+          ※ QRコードで追加する場合はスタッフにお声がけください
+        </p>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-num">2</div>
+        <div class="step-title">予約フォームでクラスを予約する</div>
+      </div>
+      <div class="step-body">
+        友だち追加が完了したら、下のボタンから予約ページへ進んでください。<br><br>
+        <strong>予約に必要なもの：</strong>
+        <ul class="substeps">
+          <li><span class="substep-num">✓</span>お名前（ひらがな・漢字どちらでもOK）</li>
+        </ul>
+        <br>
+        お名前を入力してクラスを選ぶだけで予約完了です。<br>
+        キャンセルの場合はLINEでご連絡ください。
+      </div>
+    </div>
+
+  </div>
+
+  <a class="reserve-btn" href="yoga-yoyaku.html">
+    🌿 クラスを予約する →
+  </a>
+
+  <div class="note">
+    <div class="note-title">📌 ご注意</div>
+    ・キャンセルの場合は、LINEでご連絡ください。<br>
+    ・前日までにご連絡いただけると助かります。<br>
+    ・ご不明な点もLINEでお気軽にどうぞ。
+  </div>
+
+</main>
+
+<footer>
+  自然のめぐみ・セルフケア🌱ヨガ教室 · 佐賀市金立町
+</footer>
+
+</body>
+</html>
