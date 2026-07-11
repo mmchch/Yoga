@@ -530,7 +530,7 @@
     <ul style="margin:0;padding-left:1.2rem;color:var(--text);line-height:1.8;">
       <li>7/29（水）全クラス休みです。</li>
       <li style="position:relative;">
-        <span>7/24（金）14:00 ヒップホップ／ダンスクラス with Makoto 開催！</span>
+        <span>7/24（金）14:00 ヒップホップ／ダンスクラス with Makoto 開催！　<a href="https://note.com/eigokobo/n/n01242eebaefc" target="_blank" style="color:var(--accent);font-weight:700;">▶ 詳細はこちら</a></span>
         <div style="position:absolute;right:0;top:-2.8rem;background:white;border:2.5px solid #e05a5a;border-radius:20px;padding:0.3rem 0.9rem;font-size:0.82rem;font-weight:700;color:#e05a5a;white-space:nowrap;">
           メグミも参加しますよー
           <span style="position:absolute;left:20px;bottom:-10px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #e05a5a;"></span>
@@ -538,7 +538,7 @@
         </div>
       </li>
       <li>つくる、ゆるむ。〜季節を楽しむ小さなお茶会〜 vol.1「Tシャツヘッドバンドをつくろう」<br>
-        　① 8/2（日）14:00〜15:00頃　② 8/7（金）14:00〜15:00頃　※詳細ページ準備中
+        　① 8/2（日）14:00〜15:00頃　② 8/7（金）14:00〜15:00頃　<a href="https://note.com/eigokobo/n/nbff25d6e94f2" target="_blank" style="color:var(--accent);font-weight:700;">▶ 詳細はこちら</a>
       </li>
     </ul>
   </div>
@@ -663,6 +663,10 @@
       let subtitleHtml = '';
       if (isTsukuru) subtitleHtml = '<div style="font-size:0.78rem;color:var(--text-light);margin-bottom:0.2rem;">〜季節を楽しむ小さなお茶会〜</div>';
 
+      let detailLinkHtml = '';
+      if (isDance) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/n01242eebaefc" target="_blank" style="font-size:0.82rem;color:var(--accent);font-weight:700;">▶ 詳細・持ち物はこちら</a></div>';
+      if (isTsukuru) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/nbff25d6e94f2" target="_blank" style="font-size:0.82rem;color:var(--green-deep);font-weight:700;">▶ 詳細・持ち物はこちら</a></div>';
+
       card.innerHTML = `
         ${tagHtml}
         ${subtitleHtml}
@@ -673,6 +677,7 @@
         <div class="class-datetime"><span style="font-size:0.7rem;font-weight:400;color:var(--text-light);display:block;margin-bottom:0.15rem;letter-spacing:0.08em;">📅 日時</span>${cls.datetime}</div>
         ${cls.deadline ? `<div style="font-size:0.7rem; color:var(--text-light); margin-top:0.3rem;">締め切り：${cls.deadline}まで</div>` : ''}
         ${feeHtml}
+        ${detailLinkHtml}
       `;
 
       if (!isFull) {
