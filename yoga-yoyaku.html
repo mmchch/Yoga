@@ -209,6 +209,24 @@
   .class-card.eigo.selected { border-color: var(--accent); background: #fdf5ef; }
   .class-card.eigo.selected::before { background: var(--accent); }
 
+  /* ダンスクラス：オレンジ太枠 */
+  .class-card.dance { border: 3px solid #f07800; }
+  .class-card.dance::before { background: #f07800; }
+  .class-card.dance:hover { border-color: #f07800; box-shadow: 0 4px 16px rgba(240,120,0,0.15); }
+  .class-card.dance.selected { border-color: #f07800; background: #fff8f0; }
+  .class-card.dance.selected::before { background: #f07800; }
+  .class-tag-dance { display:inline-block;font-size:0.72rem;background:#f07800;color:white;padding:0.15rem 0.6rem;border-radius:20px;font-weight:700;margin-bottom:0.3rem; }
+
+  /* つくる、ゆるむ：緑太枠 */
+  .class-card.tsukuru { border: 3px solid var(--green-deep); }
+  .class-card.tsukuru::before { background: var(--green-deep); }
+  .class-card.tsukuru:hover { border-color: var(--green-deep); box-shadow: 0 4px 16px rgba(44,85,48,0.15); }
+  .class-card.tsukuru.selected { border-color: var(--green-deep); background: #f0f5f0; }
+  .class-card.tsukuru.selected::before { background: var(--green-deep); }
+  .class-tag-tsukuru { display:inline-block;font-size:0.72rem;background:var(--green-deep);color:white;padding:0.15rem 0.6rem;border-radius:20px;font-weight:700;margin-bottom:0.3rem; }
+
+  .class-fee { font-size:0.82rem;font-weight:700;color:#666;margin-top:0.3rem; }
+
   .class-card.full {
     opacity: 0.5;
     cursor: not-allowed;
@@ -519,6 +537,9 @@
           <span style="position:absolute;left:21px;bottom:-7px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid white;"></span>
         </div>
       </li>
+      <li>つくる、ゆるむ。〜季節を楽しむ小さな集い〜 vol.1「Tシャツヘッドバンドをつくろう」<br>
+        　① 8/2（日）14:00〜15:00頃　② 8/7（金）14:00〜15:00頃　※詳細ページ準備中
+      </li>
     </ul>
   </div>
 
@@ -623,15 +644,31 @@
       const isFew = !isFull && cls.available <= 2;
 
       const isEigo = cls.name.includes('英会話');
+      const isDance = cls.name.includes('ダンス');
+      const isTsukuru = cls.name.includes('つくる');
+      let cardClass = `class-card${isFull ? ' full' : ''}`;
+      if (isEigo) cardClass += ' eigo';
+      if (isDance) cardClass += ' dance';
+      if (isTsukuru) cardClass += ' tsukuru';
       const card = document.createElement('div');
-      card.className = `class-card${isFull ? ' full' : ''}${isEigo ? ' eigo' : ''}`;
+      card.className = cardClass;
+
+      let tagHtml = '';
+      if (isDance) tagHtml = '<span class="class-tag-dance">🎵 イベント</span>';
+      if (isTsukuru) tagHtml = '<span class="class-tag-tsukuru">🌿 イベント</span>';
+
+      let feeHtml = '';
+      if (isDance || isTsukuru) feeHtml = '<div class="class-fee">💴 参加費：1,000円（税込）</div>';
+
       card.innerHTML = `
+        ${tagHtml}
         <div class="class-header">
           <div class="class-name">${cls.name}</div>
           ${isFull ? '<span class="class-badge badge-full">満員</span>' : ''}
         </div>
         <div class="class-datetime"><span style="font-size:0.7rem;font-weight:400;color:var(--text-light);display:block;margin-bottom:0.15rem;letter-spacing:0.08em;">📅 日時</span>${cls.datetime}</div>
         ${cls.deadline ? `<div style="font-size:0.7rem; color:var(--text-light); margin-top:0.3rem;">締め切り：${cls.deadline}まで</div>` : ''}
+        ${feeHtml}
       `;
 
       if (!isFull) {
