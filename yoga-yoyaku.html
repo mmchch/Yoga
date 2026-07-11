@@ -537,7 +537,7 @@
           <span style="position:absolute;left:21px;bottom:-7px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid white;"></span>
         </div>
       </li>
-      <li>つくる、ゆるむ。〜季節を楽しむ小さな集い〜 vol.1「Tシャツヘッドバンドをつくろう」<br>
+      <li>つくる、ゆるむ。〜季節を楽しむ小さなお茶会〜 vol.1「Tシャツヘッドバンドをつくろう」<br>
         　① 8/2（日）14:00〜15:00頃　② 8/7（金）14:00〜15:00頃　※詳細ページ準備中
       </li>
     </ul>
@@ -660,8 +660,12 @@
       let feeHtml = '';
       if (isDance || isTsukuru) feeHtml = '<div class="class-fee">💴 参加費：1,000円（税込）</div>';
 
+      let subtitleHtml = '';
+      if (isTsukuru) subtitleHtml = '<div style="font-size:0.78rem;color:var(--text-light);margin-bottom:0.2rem;">〜季節を楽しむ小さなお茶会〜</div>';
+
       card.innerHTML = `
         ${tagHtml}
+        ${subtitleHtml}
         <div class="class-header">
           <div class="class-name">${cls.name}</div>
           ${isFull ? '<span class="class-badge badge-full">満員</span>' : ''}
