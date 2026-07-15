@@ -217,6 +217,14 @@
   .class-card.dance.selected::before { background: #f07800; }
   .class-tag-dance { display:inline-block;font-size:0.72rem;background:#f07800;color:white;padding:0.15rem 0.6rem;border-radius:20px;font-weight:700;margin-bottom:0.3rem; }
 
+  /* ジャンベイベント：オレンジ太枠（ダンスと同じ） */
+  .class-card.jambe { border: 3px solid #f07800; }
+  .class-card.jambe::before { background: #f07800; }
+  .class-card.jambe:hover { border-color: #f07800; box-shadow: 0 4px 16px rgba(240,120,0,0.15); }
+  .class-card.jambe.selected { border-color: #f07800; background: #fff8f0; }
+  .class-card.jambe.selected::before { background: #f07800; }
+  .class-tag-jambe { display:inline-block;font-size:0.72rem;background:#f07800;color:white;padding:0.15rem 0.6rem;border-radius:20px;font-weight:700;margin-bottom:0.3rem; }
+
   /* つくる、ゆるむ：緑太枠 */
   .class-card.tsukuru { border: 3px solid var(--green-deep); }
   .class-card.tsukuru::before { background: var(--green-deep); }
@@ -529,13 +537,10 @@
     </div>
     <ul style="margin:0;padding-left:1.2rem;color:var(--text);line-height:1.8;">
       <li>7/29（水）全クラス休みです。</li>
+      <li>7/17（金）13:00〜「ゆるっと集まろう♪〜ジャンベ×ヨガ×お茶〜」開催！参加費はドネーション　<a href="https://note.com/eigokobo/n/n2a0d00ac0264" target="_blank" style="color:var(--accent);font-weight:700;">▶ 詳細はこちら</a></li>
       <li style="position:relative;">
         <span>7/24（金）14:00 ヒップホップ／ダンスクラス with Makoto 開催！　<a href="https://note.com/eigokobo/n/n01242eebaefc" target="_blank" style="color:var(--accent);font-weight:700;">▶ 詳細はこちら</a></span>
-        <div style="position:absolute;right:0;top:-2.8rem;background:white;border:2.5px solid #e05a5a;border-radius:20px;padding:0.3rem 0.9rem;font-size:0.82rem;font-weight:700;color:#e05a5a;white-space:nowrap;">
-          メグミも参加しますよー
-          <span style="position:absolute;left:20px;bottom:-10px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #e05a5a;"></span>
-          <span style="position:absolute;left:21px;bottom:-7px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid white;"></span>
-        </div>
+
       </li>
       <li>つくる、ゆるむ。〜季節を楽しむ小さなお茶会〜 vol.1「Tシャツヘッドバンドをつくろう」<br>
         　① 8/2（日）14:00〜15:00頃　② 8/7（金）14:00〜15:00頃　<a href="https://note.com/eigokobo/n/nbff25d6e94f2" target="_blank" style="color:var(--accent);font-weight:700;">▶ 詳細はこちら</a>
@@ -645,20 +650,25 @@
 
       const isEigo = cls.name.includes('英会話');
       const isDance = cls.name.includes('ダンス');
+      const isJambe = cls.name.includes('ジャンベ');
       const isTsukuru = cls.name.includes('つくる');
       let cardClass = `class-card${isFull ? ' full' : ''}`;
       if (isEigo) cardClass += ' eigo';
       if (isDance) cardClass += ' dance';
+      if (isJambe) cardClass += ' jambe';
       if (isTsukuru) cardClass += ' tsukuru';
       const card = document.createElement('div');
       card.className = cardClass;
 
       let tagHtml = '';
       if (isDance) tagHtml = '<span class="class-tag-dance">🎵 イベント</span>';
+      if (isJambe) tagHtml = '<span class="class-tag-jambe">🥁 イベント</span>';
       if (isTsukuru) tagHtml = '<span class="class-tag-tsukuru">🌿 イベント</span>';
 
       let feeHtml = '';
       if (isDance || isTsukuru) feeHtml = '<div class="class-fee">💴 参加費：1,000円（税込）</div>';
+      if (isJambe) feeHtml = '<div class="class-fee">💴 参加費：ドネーション／お気持ちで</div>';
+      if (isJambe) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/n2a0d00ac0264" target="_blank" style="font-size:0.82rem;color:#f07800;font-weight:700;">▶ 詳細はこちら</a></div>';
 
       let subtitleHtml = '';
       if (isTsukuru) subtitleHtml = '<div style="font-size:0.78rem;color:var(--text-light);margin-bottom:0.2rem;">〜季節を楽しむ小さなお茶会〜</div>';
