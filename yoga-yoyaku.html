@@ -668,7 +668,6 @@
       let feeHtml = '';
       if (isDance || isTsukuru) feeHtml = '<div class="class-fee">💴 参加費：1,000円（税込）</div>';
       if (isJambe) feeHtml = '<div class="class-fee">💴 参加費：ドネーション／お気持ちで</div>';
-      if (isJambe) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/n2a0d00ac0264" target="_blank" style="font-size:0.82rem;color:#f07800;font-weight:700;">▶ 詳細はこちら</a></div>';
 
       let subtitleHtml = '';
       if (isTsukuru) subtitleHtml = '<div style="font-size:0.78rem;color:var(--text-light);margin-bottom:0.2rem;">〜季節を楽しむ小さなお茶会〜</div>';
@@ -676,6 +675,7 @@
       let detailLinkHtml = '';
       if (isDance) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/n01242eebaefc" target="_blank" style="font-size:0.82rem;color:var(--accent);font-weight:700;">▶ 詳細・持ち物はこちら</a></div>';
       if (isTsukuru) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/nbff25d6e94f2" target="_blank" style="font-size:0.82rem;color:var(--green-deep);font-weight:700;">▶ 詳細・持ち物はこちら</a></div>';
+      if (isJambe) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/n2a0d00ac0264" target="_blank" style="font-size:0.82rem;color:#f07800;font-weight:700;">▶ 詳細はこちら</a></div>';
 
       card.innerHTML = `
         ${tagHtml}
