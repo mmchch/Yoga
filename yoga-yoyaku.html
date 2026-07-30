@@ -587,6 +587,11 @@
       <input type="text" id="nameInput" placeholder="例：山田 花子" autocomplete="name">
     </div>
 
+    <div class="form-group">
+      <label>メールアドレス<span style="font-size:0.75rem;font-weight:400;color:var(--text-light);margin-left:0.4rem;">任意・予約確認メールが届きます</span></label>
+      <input type="email" id="emailInput" placeholder="例：yoga@example.com" autocomplete="email">
+    </div>
+
     <div class="error-msg" id="errorMsg">入力内容を確認してください。</div>
 
     <button class="submit-btn" id="submitBtn" onclick="submitReservation()">
@@ -725,6 +730,7 @@
 
   async function submitReservation() {
     const name = document.getElementById('nameInput').value.trim();
+    const email = document.getElementById('emailInput').value.trim();
     const errorMsg = document.getElementById('errorMsg');
 
     if (!name) {
@@ -746,7 +752,8 @@
           className: selectedClass.name,
           datetime: selectedClass.datetime,
           name,
-          rawDate: selectedClass.rawDate
+          rawDate: selectedClass.rawDate,
+          email
         })
       });
 
@@ -773,6 +780,7 @@
   function resetAll() {
     selectedClass = null;
     document.getElementById('nameInput').value = '';
+    document.getElementById('emailInput').value = '';
     document.getElementById('successScreen').classList.remove('visible');
     document.getElementById('stepIndicator').style.display = 'flex';
     document.getElementById('formSection').classList.remove('visible');
