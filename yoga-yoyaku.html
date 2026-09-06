@@ -235,6 +235,24 @@
 
   .class-fee { font-size:0.82rem;font-weight:700;color:#666;margin-top:0.3rem; }
 
+  /* イベント選択画面 */
+  .event-select-screen { display:none; }
+  .event-select-screen.visible { display:block; }
+  .event-option { background:white; border:1.5px solid var(--warm); border-radius:8px; padding:0.8rem 1rem; margin-bottom:0.6rem; display:flex; align-items:flex-start; gap:0.5rem; }
+  .event-option:hover { border-color:var(--green); }
+  .event-option input[type=checkbox] { margin-top:0.15rem; width:18px; height:18px; accent-color:var(--green-deep); cursor:pointer; flex-shrink:0; }
+  .event-option label { cursor:pointer; font-size:0.9rem; line-height:1.5; }
+  .event-option .fee { display:block; font-size:0.78rem; color:var(--accent); font-weight:700; margin-top:0.2rem; }
+  .event-option .fee.free { color:#666; }
+  .event-all-btn { width:100%; padding:0.7rem; background:var(--green-deep); color:white; border:none; border-radius:8px; font-size:0.9rem; font-weight:700; cursor:pointer; margin-bottom:1rem; }
+  .event-note { font-size:0.78rem; color:var(--text-light); background:#f5f5f0; border-radius:6px; padding:0.6rem 0.8rem; margin-bottom:1rem; line-height:1.6; }
+  .class-card.event-card { border:3px solid #7b5ea7; }
+  .class-card.event-card::before { background:#7b5ea7; }
+  .class-card.event-card:hover { border-color:#7b5ea7; box-shadow:0 4px 16px rgba(123,94,167,0.15); }
+  .class-card.event-card.selected { border-color:#7b5ea7; background:#f8f4ff; }
+  .class-card.event-card.selected::before { background:#7b5ea7; }
+  .class-tag-event { display:inline-block;font-size:0.72rem;background:#7b5ea7;color:white;padding:0.15rem 0.6rem;border-radius:20px;font-weight:700;margin-bottom:0.3rem; }
+
   .class-card.full {
     opacity: 0.5;
     cursor: not-allowed;
@@ -537,6 +555,7 @@
     </div>
     <ul style="margin:0;padding-left:1.2rem;color:var(--text);line-height:1.8;">
       <li>🔴 お休み：9/19（土）・9/23（火）は全クラスお休みです。</li>
+      <li>🎬 9/14（月）短編アニメ『COSMOS〜光との約束〜』上映会＋ワークショップ開催！　<a href="https://note.com/eigokobo/n/n7a5f085ad5e5" target="_blank" style="color:#7b5ea7;font-weight:700;">▶ 詳細はこちら</a></li>
       <li>🎵 大人のダンス時間 with Makoto：9/10（木）14:00〜　<a href="https://note.com/eigokobo/n/n01242eebaefc" target="_blank" style="color:var(--accent);font-weight:700;">▶ 詳細はこちら</a></li>
     </ul>
   </div>
@@ -568,6 +587,41 @@
         クラス情報を読み込み中…
       </div>
     </div>
+  </div>
+
+  <!-- イベント項目選択画面 -->
+  <div class="form-section event-select-screen" id="eventSelectScreen">
+    <div class="selected-class-info">
+      <div class="label">参加したい項目を選んでください</div>
+      <div class="value" style="font-size:0.85rem;">短編アニメ『COSMOS〜光との約束〜』上映会＋WS</div>
+      <div style="font-size:0.75rem;color:var(--text-light);margin-top:0.2rem;">9/14（月）</div>
+    </div>
+
+    <button class="event-all-btn" onclick="selectAllEvents()">✅ 全部参加する</button>
+
+    <div class="event-note">⚠️ 持ち寄りランチ会・ドラムセッションは自由参加・無料です。</div>
+
+    <div class="event-option" onclick="toggleEvent('ev1')">
+      <input type="checkbox" id="ev1" value="10〜11:00 上映会＋監督のトーク（2,000円）">
+      <label for="ev1">10〜11:00　上映会＋監督のトーク<span class="fee">2,000円</span></label>
+    </div>
+    <div class="event-option" onclick="toggleEvent('ev2')">
+      <input type="checkbox" id="ev2" value="11〜13:00 監督によるビジョンツリーWS（2,000円）">
+      <label for="ev2">11〜13:00　監督によるビジョンツリーのワークショップ<span class="fee">2,000円</span></label>
+    </div>
+    <div class="event-option" onclick="toggleEvent('ev3')">
+      <input type="checkbox" id="ev3" value="13〜14:00 持ち寄りランチ会（無料・自由参加）">
+      <label for="ev3">13〜14:00　持ち寄りランチ会<span class="fee free">無料・自由参加</span></label>
+    </div>
+    <div class="event-option" onclick="toggleEvent('ev4')">
+      <input type="checkbox" id="ev4" value="14〜16:00 ドラムセッション（無料・自由参加・楽器持込OK）">
+      <label for="ev4">14〜16:00　ドラムセッション🥁<br><span style="font-size:0.78rem;color:var(--text-light);">太鼓・鈴・その他楽器の持ち込みOK！</span><span class="fee free">無料・自由参加</span></label>
+    </div>
+
+    <div class="error-msg" id="eventErrorMsg">参加する項目を1つ以上選んでください。</div>
+
+    <button class="submit-btn" onclick="proceedToName()" style="margin-top:1rem;">次へ（お名前入力）→</button>
+    <button class="back-btn" style="width:100%;margin-top:0.6rem;" onclick="backToClasses()">← クラス選択に戻る</button>
   </div>
 
   <!-- 予約フォーム -->
@@ -650,11 +704,13 @@
       const isDance = cls.name.includes('ダンス');
       const isJambe = cls.name.includes('ジャンベ');
       const isTsukuru = cls.name.includes('つくる');
+      const isEvent = cls.name.includes('COSMOS') || cls.name.includes('上映会');
       let cardClass = `class-card${isFull ? ' full' : ''}`;
       if (isEigo) cardClass += ' eigo';
       if (isDance) cardClass += ' dance';
       if (isJambe) cardClass += ' jambe';
       if (isTsukuru) cardClass += ' tsukuru';
+      if (isEvent) cardClass += ' event-card';
       const card = document.createElement('div');
       card.className = cardClass;
 
@@ -662,6 +718,7 @@
       if (isDance) tagHtml = '<span class="class-tag-dance">🎵 イベント</span>';
       if (isJambe) tagHtml = '<span class="class-tag-jambe">🥁 イベント</span>';
       if (isTsukuru) tagHtml = '<span class="class-tag-tsukuru">🌿 イベント</span>';
+      if (isEvent) tagHtml = '<span class="class-tag-event">🎬 特別イベント</span>';
 
       let feeHtml = '';
       if (isTsukuru) feeHtml = '<div class="class-fee">💴 参加費：1,000円（税込）</div>';
@@ -675,6 +732,7 @@
       if (isDance) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/n01242eebaefc" target="_blank" style="font-size:0.82rem;color:var(--accent);font-weight:700;">▶ 詳細・持ち物はこちら</a></div>';
       if (isTsukuru) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/nbff25d6e94f2" target="_blank" style="font-size:0.82rem;color:var(--green-deep);font-weight:700;">▶ 詳細・持ち物はこちら</a></div>';
       if (isJambe) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/n2a0d00ac0264" target="_blank" style="font-size:0.82rem;color:#f07800;font-weight:700;">▶ 詳細はこちら</a></div>';
+      if (isEvent) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/n7a5f085ad5e5" target="_blank" style="font-size:0.82rem;color:#7b5ea7;font-weight:700;">▶ 詳細・参加費はこちら</a></div>';
 
       card.innerHTML = `
         ${tagHtml}
@@ -697,31 +755,73 @@
     });
   }
 
+  let selectedEventItems = [];
+
   function selectClass(cls, cardEl) {
     document.querySelectorAll('.class-card').forEach(c => c.classList.remove('selected'));
     cardEl.classList.add('selected');
     selectedClass = cls;
 
-    // フォームに反映
-    document.getElementById('selectedClassName').textContent = cls.name;
-    document.getElementById('selectedClassDatetime').textContent = cls.datetime;
+    const isEvent = cls.name.includes('COSMOS') || cls.name.includes('上映会');
 
-    // フォームへ遷移
     setTimeout(() => {
       document.getElementById('classSection').style.display = 'none';
-      document.getElementById('formSection').classList.add('visible', 'fade-in');
       document.getElementById('step1').classList.remove('active');
       document.getElementById('step2').classList.add('active');
-      document.getElementById('nameInput').focus();
+
+      if (isEvent) {
+        // イベント選択画面へ
+        document.getElementById('eventSelectScreen').classList.add('visible', 'fade-in');
+      } else {
+        // 通常フォームへ
+        document.getElementById('selectedClassName').textContent = cls.name;
+        document.getElementById('selectedClassDatetime').textContent = cls.datetime;
+        document.getElementById('formSection').classList.add('visible', 'fade-in');
+        document.getElementById('nameInput').focus();
+      }
     }, 200);
+  }
+
+  function toggleEvent(id) {
+    const cb = document.getElementById(id);
+    cb.checked = !cb.checked;
+  }
+
+  function selectAllEvents() {
+    ['ev1','ev2','ev3','ev4'].forEach(id => {
+      document.getElementById(id).checked = true;
+    });
+  }
+
+  function proceedToName() {
+    const checked = ['ev1','ev2','ev3','ev4']
+      .filter(id => document.getElementById(id).checked)
+      .map(id => document.getElementById(id).value);
+
+    const errEl = document.getElementById('eventErrorMsg');
+    if (checked.length === 0) {
+      errEl.classList.add('visible');
+      return;
+    }
+    errEl.classList.remove('visible');
+    selectedEventItems = checked;
+
+    // 名前フォームへ
+    document.getElementById('selectedClassName').textContent = selectedClass.name;
+    document.getElementById('selectedClassDatetime').textContent = '参加項目：' + checked.map(v => v.split(' ')[0]).join('・');
+    document.getElementById('eventSelectScreen').classList.remove('visible');
+    document.getElementById('formSection').classList.add('visible', 'fade-in');
+    document.getElementById('nameInput').focus();
   }
 
   function backToClasses() {
     document.getElementById('formSection').classList.remove('visible');
+    document.getElementById('eventSelectScreen').classList.remove('visible');
     document.getElementById('classSection').style.display = 'block';
     document.getElementById('step1').classList.add('active');
     document.getElementById('step2').classList.remove('active');
     document.getElementById('errorMsg').classList.remove('visible');
+    document.getElementById('eventErrorMsg').classList.remove('visible');
   }
 
   async function submitReservation() {
@@ -749,7 +849,8 @@
           datetime: selectedClass.datetime,
           name,
           rawDate: selectedClass.rawDate,
-          email
+          email,
+          eventItems: selectedEventItems.length > 0 ? selectedEventItems.join(' / ') : ''
         })
       });
 
@@ -777,6 +878,9 @@
     selectedClass = null;
     document.getElementById('nameInput').value = '';
     document.getElementById('emailInput').value = '';
+    selectedEventItems = [];
+    ['ev1','ev2','ev3','ev4'].forEach(id => { document.getElementById(id).checked = false; });
+    document.getElementById('eventSelectScreen').classList.remove('visible');
     document.getElementById('successScreen').classList.remove('visible');
     document.getElementById('stepIndicator').style.display = 'flex';
     document.getElementById('formSection').classList.remove('visible');
