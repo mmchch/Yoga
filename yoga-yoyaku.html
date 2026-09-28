@@ -766,7 +766,10 @@
       const link = n.url && n.linkText
         ? `　<a href="${n.url}" target="_blank" style="color:var(--accent);font-weight:700;">${n.linkText}</a>`
         : '';
-      return `<li>${n.text}${link}</li>`;
+      const img = n.imageUrl
+        ? `<br><img src="${n.imageUrl}" alt="" style="max-width:100%;border-radius:6px;margin-top:6px;display:block;">`
+        : '';
+      return `<li>${n.text}${link}${img}</li>`;
     }).join('');
   }
 
