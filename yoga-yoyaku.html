@@ -26,7 +26,6 @@
     min-height: 100vh;
   }
 
-  /* ヘッダー */
   header {
     background: var(--green-deep);
     color: white;
@@ -35,7 +34,6 @@
     position: relative;
     overflow: hidden;
   }
-
   header::before {
     content: '';
     position: absolute;
@@ -43,7 +41,6 @@
     background: radial-gradient(ellipse at 30% 50%, rgba(138,186,166,0.15) 0%, transparent 60%),
                 radial-gradient(ellipse at 70% 30%, rgba(196,149,106,0.1) 0%, transparent 50%);
   }
-
   .header-en {
     font-family: 'Cormorant Garamond', serif;
     font-style: italic;
@@ -52,7 +49,6 @@
     color: var(--green-light);
     margin-bottom: 0.5rem;
   }
-
   header h1 {
     font-size: 1.4rem;
     font-weight: 300;
@@ -60,38 +56,13 @@
     position: relative;
   }
 
-  header p {
-    font-size: 0.78rem;
-    color: var(--green-light);
-    margin-top: 0.6rem;
-    font-weight: 300;
-    letter-spacing: 0.05em;
-  }
-
-  /* LINE案内バナー */
-  .line-banner {
-    background: #06c755;
-    color: white;
-    text-align: center;
-    padding: 0.7rem 1rem;
-    font-size: 0.78rem;
-    letter-spacing: 0.03em;
-  }
-
-  .line-banner a {
-    color: white;
-    font-weight: 700;
-    text-decoration: underline;
-  }
-
-  /* メインコンテンツ */
   main {
     max-width: 600px;
     margin: 0 auto;
     padding: 1.5rem 1rem 3rem;
   }
 
-  /* ステップ表示 */
+  /* ステップ */
   .step-indicator {
     display: flex;
     align-items: center;
@@ -99,7 +70,6 @@
     gap: 0.5rem;
     margin-bottom: 1.5rem;
   }
-
   .step {
     display: flex;
     align-items: center;
@@ -107,218 +77,204 @@
     font-size: 0.72rem;
     color: var(--text-light);
   }
-
   .step-num {
-    width: 22px;
-    height: 22px;
+    width: 22px; height: 22px;
     border-radius: 50%;
     background: var(--warm);
     border: 1.5px solid var(--green-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.65rem;
-    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700;
     color: var(--green-mid);
     transition: all 0.3s;
   }
+  .step.active .step-num { background: var(--green-deep); border-color: var(--green-deep); color: white; }
+  .step-line { width: 30px; height: 1px; background: var(--green-light); opacity: 0.4; }
 
-  .step.active .step-num {
-    background: var(--green-deep);
-    border-color: var(--green-deep);
-    color: white;
+  /* お知らせ */
+  #noticeBox {
+    background: #fff8f0;
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.5rem;
   }
 
-  .step-line {
-    width: 30px;
-    height: 1px;
-    background: var(--green-light);
-    opacity: 0.4;
+  /* ===== カレンダー ===== */
+  .calendar-wrap {
+    background: white;
+    border: 1.5px solid var(--warm);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 12px rgba(45,74,62,0.06);
   }
 
-  /* セクションタイトル */
-  .section-title {
-    font-size: 0.7rem;
-    letter-spacing: 0.15em;
-    color: var(--green-mid);
-    text-transform: uppercase;
-    margin-bottom: 1rem;
+  .cal-header {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    justify-content: space-between;
+    padding: 0.9rem 1.2rem;
+    background: var(--green-deep);
+    color: white;
+  }
+  .cal-header h2 {
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+  }
+  .cal-nav-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+    opacity: 0.8;
+  }
+  .cal-nav-btn:hover { background: rgba(255,255,255,0.2); opacity: 1; }
+
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #f0f5f3;
+    border-bottom: 1px solid var(--warm);
+  }
+  .cal-weekday {
+    text-align: center;
+    font-size: 0.65rem;
+    color: var(--text-light);
+    padding: 0.5rem 0;
+    letter-spacing: 0.05em;
+  }
+  .cal-weekday.sun { color: #c44a4a; }
+  .cal-weekday.sat { color: #3a6abf; }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--warm);
   }
 
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--green-light);
-    opacity: 0.3;
-  }
-
-  /* クラスカード */
-  .classes-grid {
+  .cal-cell {
+    background: white;
+    min-height: 52px;
+    padding: 4px 3px 3px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.7rem;
-    margin-bottom: 2rem;
+    align-items: center;
   }
+  .cal-cell:hover.has-class { background: #f0f5f3; }
+  .cal-cell.empty { background: #fafafa; cursor: default; }
+  .cal-cell.today .cal-date {
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cal-cell.past { opacity: 0.38; cursor: default; }
+  .cal-cell.selected-day { background: #e8f2ee; }
+  .cal-cell.selected-day .cal-date { color: var(--green-deep); font-weight: 700; }
 
-  .class-card {
+  .cal-date {
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 3px;
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cal-cell.sun-col .cal-date { color: #c44a4a; }
+  .cal-cell.sat-col .cal-date { color: #3a6abf; }
+  .cal-cell.today .cal-date { color: white !important; }
+
+  .cal-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    justify-content: center;
+    padding: 0 2px;
+  }
+  .cal-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--green-mid);
+    flex-shrink: 0;
+  }
+  .cal-dot.eigo { background: var(--accent); }
+  .cal-dot.event { background: #f07800; }
+
+  /* 選択日のクラス一覧 */
+  .day-classes {
     background: white;
     border: 1.5px solid var(--warm);
     border-radius: 12px;
-    padding: 1rem 1.2rem;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+  .day-classes.visible { display: block; }
+  .day-classes-header {
+    background: #f0f5f3;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.82rem;
+    color: var(--green-deep);
+    font-weight: 700;
+    border-bottom: 1px solid var(--warm);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .day-classes-header .close-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-light); font-size: 1rem;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+  }
+  .day-classes-header .close-btn:hover { background: var(--warm); }
+
+  .day-class-list { padding: 0.6rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .day-class-item {
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--warm);
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.25s;
+    transition: all 0.2s;
     position: relative;
     overflow: hidden;
   }
-
-  .class-card::before {
+  .day-class-item::before {
     content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--green-light);
-    opacity: 0;
-    transition: opacity 0.25s;
+    position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: var(--green-mid);
   }
+  .day-class-item:hover { border-color: var(--green-light); background: #f8fbfa; transform: translateX(2px); }
+  .day-class-item.eigo::before { background: var(--accent); }
+  .day-class-item.eigo:hover { border-color: var(--accent); }
+  .day-class-item.event-type::before { background: #f07800; }
+  .day-class-item.event-type:hover { border-color: #f07800; }
+  .day-class-item.full { opacity: 0.45; cursor: not-allowed; }
 
-  .class-card:hover {
-    border-color: var(--green-light);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(45,74,62,0.08);
-  }
+  .day-class-time { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .day-class-name { font-size: 0.82rem; color: var(--green-deep); margin-top: 0.15rem; }
+  .day-class-status { font-size: 0.68rem; margin-top: 0.3rem; }
+  .status-ok { color: var(--green-mid); }
+  .status-few { color: #c47a1a; }
+  .status-full { color: #c44a4a; font-weight: 700; }
+  .day-class-tag { display: inline-block; font-size: 0.65rem; background: #f07800; color: white; padding: 0.1rem 0.5rem; border-radius: 20px; font-weight: 700; margin-bottom: 0.2rem; }
 
-  .class-card:hover::before { opacity: 1; }
+  .no-class-msg { padding: 1.2rem; text-align: center; color: var(--text-light); font-size: 0.82rem; }
 
-  .class-card.selected {
-    border-color: var(--green-deep);
-    background: #f0f5f3;
-    box-shadow: 0 4px 20px rgba(45,74,62,0.12);
-  }
-
-  .class-card.selected::before { opacity: 1; background: var(--green-deep); }
-
-  /* 英会話クラス：テラコッタ */
-  .class-card.eigo::before { background: var(--accent); }
-  .class-card.eigo:hover { border-color: var(--accent); }
-  .class-card.eigo.selected { border-color: var(--accent); background: #fdf5ef; }
-  .class-card.eigo.selected::before { background: var(--accent); }
-
-  /* ダンスクラス：オレンジ太枠 */
-  .class-card.dance { border: 3px solid #f07800; }
-  .class-card.dance::before { background: #f07800; }
-  .class-card.dance:hover { border-color: #f07800; box-shadow: 0 4px 16px rgba(240,120,0,0.15); }
-  .class-card.dance.selected { border-color: #f07800; background: #fff8f0; }
-  .class-card.dance.selected::before { background: #f07800; }
-  .class-tag-dance { display:inline-block;font-size:0.72rem;background:#f07800;color:white;padding:0.15rem 0.6rem;border-radius:20px;font-weight:700;margin-bottom:0.3rem; }
-
-  /* ジャンベイベント：オレンジ太枠（ダンスと同じ） */
-  .class-card.jambe { border: 3px solid #f07800; }
-  .class-card.jambe::before { background: #f07800; }
-  .class-card.jambe:hover { border-color: #f07800; box-shadow: 0 4px 16px rgba(240,120,0,0.15); }
-  .class-card.jambe.selected { border-color: #f07800; background: #fff8f0; }
-  .class-card.jambe.selected::before { background: #f07800; }
-  .class-tag-jambe { display:inline-block;font-size:0.72rem;background:#f07800;color:white;padding:0.15rem 0.6rem;border-radius:20px;font-weight:700;margin-bottom:0.3rem; }
-
-  /* つくる、ゆるむ：緑太枠 */
-  .class-card.tsukuru { border: 3px solid var(--green-deep); }
-  .class-card.tsukuru::before { background: var(--green-deep); }
-  .class-card.tsukuru:hover { border-color: var(--green-deep); box-shadow: 0 4px 16px rgba(44,85,48,0.15); }
-  .class-card.tsukuru.selected { border-color: var(--green-deep); background: #f0f5f0; }
-  .class-card.tsukuru.selected::before { background: var(--green-deep); }
-  .class-tag-tsukuru { display:inline-block;font-size:0.72rem;background:var(--green-deep);color:white;padding:0.15rem 0.6rem;border-radius:20px;font-weight:700;margin-bottom:0.3rem; }
-
-  .class-fee { font-size:0.82rem;font-weight:700;color:#666;margin-top:0.3rem; }
-
-  /* イベント選択画面 */
-  .event-select-screen { display:none; }
-  .event-select-screen.visible { display:block; }
-  .event-option { background:white; border:1.5px solid var(--warm); border-radius:8px; padding:0.8rem 1rem; margin-bottom:0.6rem; display:flex; align-items:flex-start; gap:0.5rem; }
-  .event-option:hover { border-color:var(--green); }
-  .event-option input[type=checkbox] { margin-top:0.15rem; width:18px; height:18px; accent-color:var(--green-deep); cursor:pointer; flex-shrink:0; }
-  .event-option label { cursor:pointer; font-size:0.9rem; line-height:1.5; }
-  .event-option .fee { display:block; font-size:0.78rem; color:var(--accent); font-weight:700; margin-top:0.2rem; }
-  .event-option .fee.free { color:#666; }
-  .event-all-btn { width:100%; padding:0.7rem; background:var(--green-deep); color:white; border:none; border-radius:8px; font-size:0.9rem; font-weight:700; cursor:pointer; margin-bottom:1rem; }
-  .event-note { font-size:0.78rem; color:var(--text-light); background:#f5f5f0; border-radius:6px; padding:0.6rem 0.8rem; margin-bottom:1rem; line-height:1.6; }
-  .class-card.event-card { border:3px solid #7b5ea7; }
-  .class-card.event-card::before { background:#7b5ea7; }
-  .class-card.event-card:hover { border-color:#7b5ea7; box-shadow:0 4px 16px rgba(123,94,167,0.15); }
-  .class-card.event-card.selected { border-color:#7b5ea7; background:#f8f4ff; }
-  .class-card.event-card.selected::before { background:#7b5ea7; }
-  .class-tag-event { display:inline-block;font-size:0.72rem;background:#7b5ea7;color:white;padding:0.15rem 0.6rem;border-radius:20px;font-weight:700;margin-bottom:0.3rem; }
-
-  .class-card.full {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-
-  .class-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 0.3rem;
-  }
-
-  .class-name {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--green-deep);
-  }
-
-  .class-badge {
-    font-size: 0.65rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 20px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-  }
-
-  .badge-ok { background: #e8f4ef; color: var(--green-mid); }
-  .badge-few { background: #fef3e2; color: #c47a1a; }
-  .badge-full { background: #fde8e8; color: #c44a4a; }
-
-  .class-datetime {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--warm);
-    letter-spacing: 0.03em;
-  }
-
-  .class-capacity-bar {
-    height: 3px;
-    background: var(--warm);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-top: 0.6rem;
-  }
-
-  .capacity-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 0.5s ease;
-  }
-
-  .fill-ok { background: var(--green-mid); }
-  .fill-few { background: #e0a030; }
-  .fill-full { background: #c44a4a; }
-
-  .capacity-text {
-    font-size: 0.68rem;
-    color: var(--text-light);
-    margin-top: 0.3rem;
-  }
-
-  /* フォーム */
+  /* ===== フォーム ===== */
   .form-section {
     background: white;
     border: 1.5px solid var(--warm);
@@ -327,7 +283,6 @@
     margin-bottom: 1rem;
     display: none;
   }
-
   .form-section.visible { display: block; }
 
   .selected-class-info {
@@ -337,217 +292,97 @@
     margin-bottom: 1.2rem;
     border-left: 3px solid var(--green-deep);
   }
+  .selected-class-info .label { font-size: 0.65rem; color: var(--text-light); letter-spacing: 0.1em; margin-bottom: 0.2rem; }
+  .selected-class-info .value { font-size: 0.9rem; font-weight: 700; color: var(--green-deep); }
 
-  .selected-class-info .label {
-    font-size: 0.65rem;
-    color: var(--text-light);
-    letter-spacing: 0.1em;
-    margin-bottom: 0.2rem;
-  }
-
-  .selected-class-info .value {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--green-deep);
-  }
-
-  .form-group {
-    margin-bottom: 1rem;
-  }
-
-  .form-group label {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text-light);
-    letter-spacing: 0.08em;
-    margin-bottom: 0.4rem;
-  }
-
-  .form-group label span {
-    color: var(--accent);
-    margin-left: 0.2rem;
-  }
-
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 0.75rem; color: var(--text-light); letter-spacing: 0.08em; margin-bottom: 0.4rem; }
+  .form-group label span { color: var(--accent); margin-left: 0.2rem; }
   .form-group input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1.5px solid var(--warm);
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-family: 'Zen Kaku Gothic New', sans-serif;
-    color: var(--text);
-    background: var(--cream);
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
+    width: 100%; padding: 0.75rem 1rem;
+    border: 1.5px solid var(--warm); border-radius: 8px;
+    font-size: 0.95rem; font-family: 'Zen Kaku Gothic New', sans-serif;
+    color: var(--text); background: var(--cream);
+    transition: border-color 0.2s; -webkit-appearance: none;
   }
+  .form-group input:focus { outline: none; border-color: var(--green-mid); background: white; }
 
-  .form-group input:focus {
-    outline: none;
-    border-color: var(--green-mid);
-    background: white;
-  }
-
-  /* LINE IDフィールド */
-  .line-id-note {
-    font-size: 0.68rem;
-    color: var(--text-light);
-    margin-top: 0.4rem;
-    line-height: 1.5;
-  }
-
-  /* 送信ボタン */
   .submit-btn {
-    width: 100%;
-    padding: 1rem;
-    background: var(--green-deep);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    font-family: 'Zen Kaku Gothic New', sans-serif;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all 0.25s;
-    margin-top: 0.5rem;
+    width: 100%; padding: 1rem;
+    background: var(--green-deep); color: white;
+    border: none; border-radius: 10px;
+    font-size: 0.95rem; font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 700; letter-spacing: 0.08em;
+    cursor: pointer; transition: all 0.25s; margin-top: 0.5rem;
   }
-
-  .submit-btn:hover {
-    background: var(--green-mid);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(45,74,62,0.2);
-  }
-
-  .submit-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  /* 完了画面 */
-  .success-screen {
-    text-align: center;
-    padding: 2rem 1rem;
-    display: none;
-  }
-
-  .success-screen.visible { display: block; }
-
-  .success-icon {
-    width: 64px;
-    height: 64px;
-    background: var(--green-deep);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1.2rem;
-    font-size: 1.8rem;
-  }
-
-  .success-screen h2 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--green-deep);
-    margin-bottom: 0.6rem;
-  }
-
-  .success-screen p {
-    font-size: 0.82rem;
-    color: var(--text-light);
-    line-height: 1.7;
-    margin-bottom: 1.5rem;
-  }
+  .submit-btn:hover { background: var(--green-mid); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,74,62,0.2); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
   .back-btn {
-    display: inline-block;
-    padding: 0.7rem 2rem;
-    border: 1.5px solid var(--green-deep);
-    border-radius: 8px;
-    color: var(--green-deep);
-    font-size: 0.82rem;
+    display: inline-block; padding: 0.7rem 2rem;
+    border: 1.5px solid var(--green-deep); border-radius: 8px;
+    color: var(--green-deep); font-size: 0.82rem;
     font-family: 'Zen Kaku Gothic New', sans-serif;
-    cursor: pointer;
-    background: white;
-    transition: all 0.2s;
+    cursor: pointer; background: white; transition: all 0.2s;
   }
+  .back-btn:hover { background: var(--green-deep); color: white; }
 
-  .back-btn:hover {
-    background: var(--green-deep);
-    color: white;
-  }
-
-  /* ローディング */
-  .loading {
-    text-align: center;
-    padding: 2rem;
-    color: var(--text-light);
-    font-size: 0.82rem;
-  }
-
-  .spinner {
-    width: 28px;
-    height: 28px;
-    border: 2.5px solid var(--warm);
-    border-top-color: var(--green-mid);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 0.8rem;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* エラー */
-  .error-msg {
-    background: #fde8e8;
-    color: #c44a4a;
-    padding: 0.7rem 1rem;
-    border-radius: 8px;
-    font-size: 0.78rem;
-    margin-top: 0.8rem;
-    display: none;
-  }
-
+  .error-msg { background: #fde8e8; color: #c44a4a; padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.78rem; margin-top: 0.8rem; display: none; }
   .error-msg.visible { display: block; }
 
-  /* フッター */
-  footer {
-    text-align: center;
-    padding: 1.5rem;
-    font-size: 0.7rem;
-    color: var(--text-light);
-    letter-spacing: 0.05em;
-  }
+  /* 完了 */
+  .success-screen { text-align: center; padding: 2rem 1rem; display: none; }
+  .success-screen.visible { display: block; }
+  .success-icon { width: 64px; height: 64px; background: var(--green-deep); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem; font-size: 1.8rem; }
+  .success-screen h2 { font-size: 1.2rem; font-weight: 700; color: var(--green-deep); margin-bottom: 0.6rem; }
+  .success-screen p { font-size: 0.82rem; color: var(--text-light); line-height: 1.7; margin-bottom: 1.5rem; }
 
-  /* アニメーション */
-  .fade-in {
-    animation: fadeIn 0.4s ease;
-  }
+  .loading { text-align: center; padding: 2rem; color: var(--text-light); font-size: 0.82rem; }
+  .spinner { width: 28px; height: 28px; border: 2.5px solid var(--warm); border-top-color: var(--green-mid); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 0.8rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* イベント選択 */
+  .event-select-screen { display: none; }
+  .event-select-screen.visible { display: block; }
+  .event-option { background: white; border: 1.5px solid var(--warm); border-radius: 8px; padding: 0.8rem 1rem; margin-bottom: 0.6rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+  .event-option input[type=checkbox] { margin-top: 0.15rem; width: 18px; height: 18px; accent-color: var(--green-deep); cursor: pointer; flex-shrink: 0; }
+  .event-option label { cursor: pointer; font-size: 0.9rem; line-height: 1.5; }
+  .event-option .fee { display: block; font-size: 0.78rem; color: var(--accent); font-weight: 700; margin-top: 0.2rem; }
+  .event-option .fee.free { color: #666; }
+  .event-all-btn { width: 100%; padding: 0.7rem; background: var(--green-deep); color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer; margin-bottom: 1rem; }
+  .event-note { font-size: 0.78rem; color: var(--text-light); background: #f5f5f0; border-radius: 6px; padding: 0.6rem 0.8rem; margin-bottom: 1rem; line-height: 1.6; }
+
+  footer { text-align: center; padding: 1.5rem; font-size: 0.7rem; color: var(--text-light); letter-spacing: 0.05em; }
+
+  /* モバイル最適化 */
+  @media (max-width: 380px) {
+    .cal-cell { min-height: 44px; }
+    .cal-date { font-size: 0.72rem; }
+    .cal-dot { width: 4px; height: 4px; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <img src="logo.png" alt="自然のめぐみロゴ" style="width:72px; height:72px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.3); margin-bottom:0.6rem;">
+  <img src="logo.png" alt="自然のめぐみロゴ" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3);margin-bottom:0.6rem;">
   <p class="header-en">自然のめぐみ・セルフケア</p>
   <h1>会員専用クラス予約</h1>
 </header>
 
-<div style="background:#f0f5f3; text-align:center; padding:0.7rem 1rem; display:flex; align-items:center; justify-content:center; gap:0.8rem; flex-wrap:wrap;">
-  <span style="font-size:0.78rem; color:#4a7c6f;">キャンセルのご連絡は</span>
-  <a href="https://lin.ee/VMsTeFw" target="_blank" style="display:inline-flex; align-items:center; gap:0.4rem; background:#06c755; color:white; border-radius:8px; padding:0.4rem 1rem; font-size:0.78rem; font-weight:700; text-decoration:none;">
+<div style="background:#f0f5f3;text-align:center;padding:0.7rem 1rem;display:flex;align-items:center;justify-content:center;gap:0.8rem;flex-wrap:wrap;">
+  <span style="font-size:0.78rem;color:#4a7c6f;">キャンセルのご連絡は</span>
+  <a href="https://lin.ee/VMsTeFw" target="_blank" style="display:inline-flex;align-items:center;gap:0.4rem;background:#06c755;color:white;border-radius:8px;padding:0.4rem 1rem;font-size:0.78rem;font-weight:700;text-decoration:none;">
     💬 LINEで連絡する
   </a>
 </div>
 
 <main>
 
-  <!-- お知らせ枠 -->
+  <!-- お知らせ -->
   <div id="noticeBox" style="background:#fff8f0;border:2px solid var(--accent);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1.5rem;">
     <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem;flex-wrap:wrap;">
       <span style="font-weight:700;color:var(--accent);">📢 お知らせ</span>
@@ -560,45 +395,62 @@
 
   <!-- ステップ -->
   <div class="step-indicator" id="stepIndicator">
-    <div class="step active" id="step1">
-      <div class="step-num">1</div>
-      <span>クラス選択</span>
-    </div>
+    <div class="step active" id="step1"><div class="step-num">1</div><span>日程選択</span></div>
     <div class="step-line"></div>
-    <div class="step" id="step2">
-      <div class="step-num">2</div>
-      <span>お名前入力</span>
-    </div>
+    <div class="step" id="step2"><div class="step-num">2</div><span>お名前入力</span></div>
     <div class="step-line"></div>
-    <div class="step" id="step3">
-      <div class="step-num">3</div>
-      <span>完了</span>
-    </div>
+    <div class="step" id="step3"><div class="step-num">3</div><span>完了</span></div>
   </div>
 
-  <!-- クラス一覧 -->
-  <div id="classSection">
-    <p class="section-title">クラスを選ぶ</p>
-    <div class="classes-grid" id="classesGrid">
-      <div class="loading">
-        <div class="spinner"></div>
-        クラス情報を読み込み中…
+  <!-- カレンダー -->
+  <div id="calendarSection">
+    <div class="calendar-wrap">
+      <div class="cal-header">
+        <button class="cal-nav-btn" id="prevMonthBtn" onclick="changeMonth(-1)">‹</button>
+        <h2 id="calTitle">読み込み中…</h2>
+        <button class="cal-nav-btn" id="nextMonthBtn" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="cal-weekdays">
+        <div class="cal-weekday sun">日</div>
+        <div class="cal-weekday">月</div>
+        <div class="cal-weekday">火</div>
+        <div class="cal-weekday">水</div>
+        <div class="cal-weekday">木</div>
+        <div class="cal-weekday">金</div>
+        <div class="cal-weekday sat">土</div>
+      </div>
+      <div class="cal-grid" id="calGrid">
+        <div style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--text-light);font-size:0.82rem;">
+          <div class="spinner"></div>読み込み中…
+        </div>
       </div>
     </div>
+
+    <!-- 凡例 -->
+    <div style="display:flex;gap:1rem;font-size:0.7rem;color:var(--text-light);justify-content:center;margin-bottom:1rem;">
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--green-mid);display:inline-block;"></span>ヨガ</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;"></span>英会話</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#f07800;display:inline-block;"></span>イベント</span>
+    </div>
   </div>
 
-  <!-- イベント項目選択画面 -->
+  <!-- 選択日のクラス一覧（ポップアップ風） -->
+  <div class="day-classes" id="dayClasses">
+    <div class="day-classes-header">
+      <span id="dayClassesTitle">—</span>
+      <button class="close-btn" onclick="closeDayClasses()">✕</button>
+    </div>
+    <div class="day-class-list" id="dayClassList"></div>
+  </div>
+
+  <!-- イベント選択画面 -->
   <div class="form-section event-select-screen" id="eventSelectScreen">
     <div class="selected-class-info">
       <div class="label">参加したい項目を選んでください</div>
       <div class="value" style="font-size:0.85rem;">短編アニメ『COSMOS〜光との約束〜』上映会＋WS</div>
-      <div style="font-size:0.75rem;color:var(--text-light);margin-top:0.2rem;">9/14（月）</div>
     </div>
-
     <button class="event-all-btn" onclick="selectAllEvents()">✅ 全部参加する</button>
-
     <div class="event-note">⚠️ 持ち寄りランチ会・ドラムセッションは自由参加・無料です。<br>🎉 上映会＋ワークショップ両方参加は <strong>3,000円</strong>（通常4,000円→1,000円割引）</div>
-
     <div class="event-option" onclick="toggleEvent('ev1')">
       <input type="checkbox" id="ev1" value="10〜11:00 上映会＋監督のトーク（2,000円）">
       <label for="ev1">10〜11:00　上映会＋監督のトーク<span class="fee">2,000円</span></label>
@@ -613,13 +465,11 @@
     </div>
     <div class="event-option" onclick="toggleEvent('ev4')">
       <input type="checkbox" id="ev4" value="14〜16:00 ドラムセッション（無料・自由参加・楽器持込OK）">
-      <label for="ev4">14〜16:00　ドラムセッション🥁<br><span style="font-size:0.78rem;color:var(--text-light);">太鼓・鈴・その他楽器の持ち込みOK！</span><span class="fee free">無料・自由参加</span></label>
+      <label for="ev4">14〜16:00　ドラムセッション🥁<span class="fee free">無料・自由参加</span></label>
     </div>
-
     <div class="error-msg" id="eventErrorMsg">参加する項目を1つ以上選んでください。</div>
-
     <button class="submit-btn" onclick="proceedToName()" style="margin-top:1rem;">次へ（お名前入力）→</button>
-    <button class="back-btn" style="width:100%;margin-top:0.6rem;" onclick="backToClasses()">← クラス選択に戻る</button>
+    <button class="back-btn" style="width:100%;margin-top:0.6rem;" onclick="backToCalendar()">← カレンダーに戻る</button>
   </div>
 
   <!-- 予約フォーム -->
@@ -627,39 +477,26 @@
     <div class="selected-class-info">
       <div class="label">選択中のクラス</div>
       <div class="value" id="selectedClassName">—</div>
-      <div style="font-size:0.75rem; color: var(--text-light); margin-top:0.2rem;" id="selectedClassDatetime">—</div>
+      <div style="font-size:0.75rem;color:var(--text-light);margin-top:0.2rem;" id="selectedClassDatetime">—</div>
     </div>
-
     <div class="form-group">
       <label>お名前<span>*</span></label>
       <input type="text" id="nameInput" placeholder="例：山田 花子" autocomplete="name">
     </div>
-
     <div class="form-group">
       <label>メールアドレス<span style="font-size:0.75rem;font-weight:400;color:var(--text-light);margin-left:0.4rem;">任意・予約確認メールが届きます</span></label>
       <input type="email" id="emailInput" placeholder="例：yoga@example.com" autocomplete="email">
     </div>
-
     <div class="error-msg" id="errorMsg">入力内容を確認してください。</div>
-
-    <button class="submit-btn" id="submitBtn" onclick="submitReservation()">
-      予約を確定する
-    </button>
-
-    <button class="back-btn" style="width:100%; margin-top:0.6rem;" onclick="backToClasses()">
-      ← クラス選択に戻る
-    </button>
+    <button class="submit-btn" id="submitBtn" onclick="submitReservation()">予約を確定する</button>
+    <button class="back-btn" style="width:100%;margin-top:0.6rem;" onclick="backToCalendar()">← カレンダーに戻る</button>
   </div>
 
   <!-- 完了画面 -->
   <div class="success-screen" id="successScreen">
     <div class="success-icon">🌿</div>
     <h2>予約が完了しました</h2>
-    <p>
-      ご予約を受け付けました。<br>
-      当日お会いできることを楽しみにしています。🌿<br><br>
-      キャンセルの場合はLINEでご連絡ください。
-    </p>
+    <p>ご予約を受け付けました。<br>当日お会いできることを楽しみにしています。🌿<br><br>キャンセルの場合はLINEでご連絡ください。</p>
     <p style="margin-top:1.2rem;padding:0.8rem 1.2rem;background:#fff3cd;border-left:4px solid #e6a817;border-radius:4px;font-weight:700;color:#7a5200;font-size:1rem;">
       ⚠️ 予約完了のメール返信はありません。<br>当日そのままお越しください。
     </p>
@@ -668,246 +505,314 @@
 
 </main>
 
-<footer>
-  自然のめぐみ・セルフケア🌱ヨガ教室 · 佐賀市金立町
-</footer>
+<footer>自然のめぐみ・セルフケア🌱ヨガ教室 · 佐賀市金立町</footer>
 
 <script>
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbx_hCWNYkN9Hctsi12yq3T0fVT3SdfgutiWW-QhYUMhyG-E304ZLxYPjUZet_wTnDJf/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbx_hCWNYkN9Hctsi12yq3T0fVT3SdfgutiWW-QhYUMhyG-E304ZLxYPjUZet_wTnDJf/exec';
 
-  let selectedClass = null;
+let allClasses = [];
+let selectedClass = null;
+let selectedEventItems = [];
+let currentYear, currentMonth;
+let selectedDateKey = null;
 
-  // クラス一覧読み込み
-  async function loadClasses() {
-    try {
-      const res = await fetch(GAS_URL);
-      const data = await res.json();
-      renderClasses(data.classes);
-      renderNotices(data.notices || []);
-    } catch (e) {
-      document.getElementById('classesGrid').innerHTML =
-        '<p style="color:#c44a4a; font-size:0.82rem; text-align:center;">クラス情報の読み込みに失敗しました。ページを更新してください。</p>';
-    }
+// 日付ごとにクラスをまとめるマップ
+let classByDate = {};
+
+async function loadClasses() {
+  try {
+    const res = await fetch(GAS_URL);
+    const data = await res.json();
+    allClasses = data.classes || [];
+    renderNotices(data.notices || []);
+    buildClassByDate();
+    const now = new Date();
+    currentYear = now.getFullYear();
+    currentMonth = now.getMonth(); // 0-indexed
+    renderCalendar();
+  } catch (e) {
+    document.getElementById('calGrid').innerHTML =
+      '<div style="grid-column:1/-1;padding:1.5rem;text-align:center;color:#c44a4a;font-size:0.82rem;">クラス情報の読み込みに失敗しました。<br>ページを更新してください。</div>';
+  }
+}
+
+function buildClassByDate() {
+  classByDate = {};
+  allClasses.forEach(cls => {
+    // rawDate は ms タイムスタンプ
+    const d = new Date(cls.rawDate);
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    if (!classByDate[key]) classByDate[key] = [];
+    classByDate[key].push(cls);
+  });
+}
+
+function renderCalendar() {
+  const year = currentYear;
+  const month = currentMonth;
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  document.getElementById('calTitle').textContent = `${year}年 ${monthNames[month]}`;
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  // 月の初日・最終日
+  const firstDay = new Date(year, month, 1).getDay(); // 0=日
+  const lastDate = new Date(year, month + 1, 0).getDate();
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  // 空白セル（前月分）
+  for (let i = 0; i < firstDay; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell empty';
+    grid.appendChild(cell);
   }
 
-  function renderClasses(classes) {
-    const grid = document.getElementById('classesGrid');
-    grid.innerHTML = '';
+  for (let d = 1; d <= lastDate; d++) {
+    const cellDate = new Date(year, month, d);
+    const key = `${year}-${month}-${d}`;
+    const dayClasses = classByDate[key] || [];
+    const isPast = cellDate < today;
+    const isToday = cellDate.getTime() === today.getTime();
+    const dow = cellDate.getDay(); // 0=日
 
+    const cell = document.createElement('div');
+    let cls = 'cal-cell';
+    if (dayClasses.length > 0) cls += ' has-class';
+    if (isPast) cls += ' past';
+    if (isToday) cls += ' today';
+    if (dow === 0) cls += ' sun-col';
+    if (dow === 6) cls += ' sat-col';
+    cell.className = cls;
+    cell.dataset.key = key;
+    cell.dataset.date = `${month+1}月${d}日（${['日','月','火','水','木','金','土'][dow]}）`;
+
+    const dateEl = document.createElement('div');
+    dateEl.className = 'cal-date';
+    dateEl.textContent = d;
+    cell.appendChild(dateEl);
+
+    if (dayClasses.length > 0) {
+      const dotsEl = document.createElement('div');
+      dotsEl.className = 'cal-dots';
+      dayClasses.forEach(c => {
+        const dot = document.createElement('div');
+        const isEigo = c.name.includes('英会話');
+        const isEvent = c.name.includes('ダンス') || c.name.includes('ジャンベ') || c.name.includes('つくる') || c.name.includes('COSMOS') || c.name.includes('上映会');
+        dot.className = 'cal-dot' + (isEigo ? ' eigo' : isEvent ? ' event' : '');
+        dotsEl.appendChild(dot);
+      });
+      cell.appendChild(dotsEl);
+
+      if (!isPast) {
+        cell.onclick = () => showDayClasses(key, cell.dataset.date, dayClasses);
+      }
+    }
+
+    grid.appendChild(cell);
+  }
+
+  // 前月・翌月ボタン制御（今月より前には戻れない）
+  const now = new Date();
+  document.getElementById('prevMonthBtn').style.opacity =
+    (year > now.getFullYear() || month > now.getMonth()) ? '0.8' : '0.2';
+  document.getElementById('prevMonthBtn').style.pointerEvents =
+    (year > now.getFullYear() || month > now.getMonth()) ? 'auto' : 'none';
+}
+
+function changeMonth(delta) {
+  currentMonth += delta;
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  closeDayClasses();
+  renderCalendar();
+}
+
+function showDayClasses(key, dateLabel, classes) {
+  // 選択中の日のハイライト
+  document.querySelectorAll('.cal-cell.selected-day').forEach(c => c.classList.remove('selected-day'));
+  const targetCell = document.querySelector(`.cal-cell[data-key="${key}"]`);
+  if (targetCell) targetCell.classList.add('selected-day');
+  selectedDateKey = key;
+
+  document.getElementById('dayClassesTitle').textContent = dateLabel;
+  const list = document.getElementById('dayClassList');
+  list.innerHTML = '';
+
+  if (classes.length === 0) {
+    list.innerHTML = '<div class="no-class-msg">この日のクラスはありません</div>';
+  } else {
     classes.forEach(cls => {
-      const ratio = cls.reserved / cls.capacity;
       const isFull = cls.available <= 0;
       const isFew = !isFull && cls.available <= 2;
-
       const isEigo = cls.name.includes('英会話');
-      const isDance = cls.name.includes('ダンス');
-      const isJambe = cls.name.includes('ジャンベ');
-      const isTsukuru = cls.name.includes('つくる');
-      const isEvent = cls.name.includes('COSMOS') || cls.name.includes('上映会');
-      let cardClass = `class-card${isFull ? ' full' : ''}`;
-      if (isEigo) cardClass += ' eigo';
-      if (isDance) cardClass += ' dance';
-      if (isJambe) cardClass += ' jambe';
-      if (isTsukuru) cardClass += ' tsukuru';
-      if (isEvent) cardClass += ' event-card';
-      const card = document.createElement('div');
-      card.className = cardClass;
+      const isEvent = cls.name.includes('ダンス') || cls.name.includes('ジャンベ') || cls.name.includes('つくる') || cls.name.includes('COSMOS') || cls.name.includes('上映会');
+
+      const item = document.createElement('div');
+      let itemCls = 'day-class-item';
+      if (isEigo) itemCls += ' eigo';
+      if (isEvent) itemCls += ' event-type';
+      if (isFull) itemCls += ' full';
+      item.className = itemCls;
 
       let tagHtml = '';
-      if (isDance) tagHtml = '<span class="class-tag-dance">🎵 イベント</span>';
-      if (isJambe) tagHtml = '<span class="class-tag-jambe">🥁 イベント</span>';
-      if (isTsukuru) tagHtml = '<span class="class-tag-tsukuru">🌿 イベント</span>';
-      if (isEvent) tagHtml = '<span class="class-tag-event">🎬 特別イベント</span>';
+      if (isEvent) tagHtml = '<div class="day-class-tag">🎵 イベント</div>';
 
-      let feeHtml = '';
-      if (isTsukuru) feeHtml = '<div class="class-fee">💴 参加費：1,000円（税込）</div>';
-      if (isDance) feeHtml = '<div class="class-fee">💴 参加費：1,000円＋応援のお気持ち</div>';
-      if (isJambe) feeHtml = '<div class="class-fee">💴 参加費：ドネーション／お気持ちで</div>';
+      let statusHtml = '';
+      if (isFull) statusHtml = '<div class="day-class-status status-full">満員</div>';
+      else if (isFew) statusHtml = `<div class="day-class-status status-few">残り${cls.available}席</div>`;
+      else statusHtml = `<div class="day-class-status status-ok">予約受付中 ✓</div>`;
 
-      let subtitleHtml = '';
-      if (isTsukuru) subtitleHtml = '<div style="font-size:0.78rem;color:var(--text-light);margin-bottom:0.2rem;">〜季節を楽しむ小さなお茶会〜</div>';
-
-      let detailLinkHtml = '';
-      if (isDance) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/n01242eebaefc" target="_blank" style="font-size:0.82rem;color:var(--accent);font-weight:700;">▶ 詳細・持ち物はこちら</a></div>';
-      if (isTsukuru) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/nbff25d6e94f2" target="_blank" style="font-size:0.82rem;color:var(--green-deep);font-weight:700;">▶ 詳細・持ち物はこちら</a></div>';
-      if (isJambe) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/n2a0d00ac0264" target="_blank" style="font-size:0.82rem;color:#f07800;font-weight:700;">▶ 詳細はこちら</a></div>';
-      if (isEvent) detailLinkHtml = '<div style="margin-top:0.4rem;"><a href="https://note.com/eigokobo/n/n7a5f085ad5e5" target="_blank" style="font-size:0.82rem;color:#7b5ea7;font-weight:700;">▶ 詳細・参加費はこちら</a></div>';
-
-      card.innerHTML = `
+      item.innerHTML = `
         ${tagHtml}
-        ${subtitleHtml}
-        <div class="class-header">
-          <div class="class-name">${cls.name}</div>
-          ${isFull ? '<span class="class-badge badge-full">満員</span>' : ''}
-        </div>
-        <div class="class-datetime">${cls.datetime}</div>
-        ${cls.deadline ? `<div style="font-size:0.7rem; color:var(--text-light); margin-top:0.3rem;">締め切り：${cls.deadline}まで</div>` : ''}
-        ${feeHtml}
-        ${detailLinkHtml}
+        <div class="day-class-time">${cls.startTime}〜</div>
+        <div class="day-class-name">${cls.name}</div>
+        ${cls.deadline ? `<div style="font-size:0.68rem;color:var(--text-light);margin-top:0.2rem;">締め切り：${cls.deadline}まで</div>` : ''}
+        ${statusHtml}
       `;
 
       if (!isFull) {
-        card.onclick = () => selectClass(cls, card);
+        item.onclick = () => selectClass(cls);
       }
 
-      grid.appendChild(card);
+      list.appendChild(item);
     });
   }
 
-  let selectedEventItems = [];
+  const box = document.getElementById('dayClasses');
+  box.classList.add('visible', 'fade-in');
+  // スクロール
+  setTimeout(() => box.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
 
-  function renderNotices(notices) {
-    const ul = document.getElementById('noticeList');
-    if (!notices || notices.length === 0) {
-      ul.innerHTML = '<li style="color:var(--text-light);font-size:0.85rem;">現在お知らせはありません。</li>';
-      return;
-    }
-    ul.innerHTML = notices.map(n => {
-      const link = n.url && n.linkText
-        ? `　<a href="${n.url}" target="_blank" style="color:var(--accent);font-weight:700;">${n.linkText}</a>`
-        : '';
-      const img = n.imageUrl
-        ? `<br><img src="${n.imageUrl}" alt="" style="max-width:100%;border-radius:6px;margin-top:6px;display:block;">`
-        : '';
-      return `<li>${n.text}${link}${img}</li>`;
-    }).join('');
-  }
+function closeDayClasses() {
+  document.getElementById('dayClasses').classList.remove('visible');
+  document.querySelectorAll('.cal-cell.selected-day').forEach(c => c.classList.remove('selected-day'));
+  selectedDateKey = null;
+}
 
-  function selectClass(cls, cardEl) {
-    document.querySelectorAll('.class-card').forEach(c => c.classList.remove('selected'));
-    cardEl.classList.add('selected');
-    selectedClass = cls;
+function selectClass(cls) {
+  selectedClass = cls;
+  const isEvent = cls.name.includes('COSMOS') || cls.name.includes('上映会');
 
-    const isEvent = cls.name.includes('COSMOS') || cls.name.includes('上映会');
+  document.getElementById('calendarSection').style.display = 'none';
+  document.getElementById('dayClasses').classList.remove('visible');
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step2').classList.add('active');
 
-    setTimeout(() => {
-      document.getElementById('classSection').style.display = 'none';
-      document.getElementById('step1').classList.remove('active');
-      document.getElementById('step2').classList.add('active');
-
-      if (isEvent) {
-        // イベント選択画面へ
-        document.getElementById('eventSelectScreen').classList.add('visible', 'fade-in');
-      } else {
-        // 通常フォームへ
-        document.getElementById('selectedClassName').textContent = cls.name;
-        document.getElementById('selectedClassDatetime').textContent = cls.datetime;
-        document.getElementById('formSection').classList.add('visible', 'fade-in');
-        document.getElementById('nameInput').focus();
-      }
-    }, 200);
-  }
-
-  function toggleEvent(id) {
-    const cb = document.getElementById(id);
-    cb.checked = !cb.checked;
-  }
-
-  function selectAllEvents() {
-    ['ev1','ev2','ev3','ev4'].forEach(id => {
-      document.getElementById(id).checked = true;
-    });
-  }
-
-  function proceedToName() {
-    const checked = ['ev1','ev2','ev3','ev4']
-      .filter(id => document.getElementById(id).checked)
-      .map(id => document.getElementById(id).value);
-
-    const errEl = document.getElementById('eventErrorMsg');
-    if (checked.length === 0) {
-      errEl.classList.add('visible');
-      return;
-    }
-    errEl.classList.remove('visible');
-    selectedEventItems = checked;
-
-    // 名前フォームへ
-    document.getElementById('selectedClassName').textContent = selectedClass.name;
-    document.getElementById('selectedClassDatetime').textContent = '参加項目：' + checked.map(v => v.split(' ')[0]).join('・');
-    document.getElementById('eventSelectScreen').classList.remove('visible');
+  if (isEvent) {
+    document.getElementById('eventSelectScreen').classList.add('visible', 'fade-in');
+  } else {
+    document.getElementById('selectedClassName').textContent = cls.name;
+    document.getElementById('selectedClassDatetime').textContent = cls.datetime;
     document.getElementById('formSection').classList.add('visible', 'fade-in');
-    document.getElementById('nameInput').focus();
+    setTimeout(() => document.getElementById('nameInput').focus(), 300);
   }
+}
 
-  function backToClasses() {
-    document.getElementById('formSection').classList.remove('visible');
-    document.getElementById('eventSelectScreen').classList.remove('visible');
-    document.getElementById('classSection').style.display = 'block';
-    document.getElementById('step1').classList.add('active');
-    document.getElementById('step2').classList.remove('active');
-    document.getElementById('errorMsg').classList.remove('visible');
-    document.getElementById('eventErrorMsg').classList.remove('visible');
+function renderNotices(notices) {
+  const ul = document.getElementById('noticeList');
+  if (!notices || notices.length === 0) {
+    ul.innerHTML = '<li style="color:var(--text-light);font-size:0.85rem;">現在お知らせはありません。</li>';
+    return;
   }
+  ul.innerHTML = notices.map(n => {
+    const link = n.url && n.linkText
+      ? `　<a href="${n.url}" target="_blank" style="color:var(--accent);font-weight:700;">${n.linkText}</a>`
+      : '';
+    const img = n.imageUrl
+      ? `<br><img src="${n.imageUrl}" alt="" style="max-width:100%;border-radius:6px;margin-top:6px;display:block;">`
+      : '';
+    return `<li>${n.text}${link}${img}</li>`;
+  }).join('');
+}
 
-  async function submitReservation() {
-    const name = document.getElementById('nameInput').value.trim();
-    const email = document.getElementById('emailInput').value.trim();
-    const errorMsg = document.getElementById('errorMsg');
+function toggleEvent(id) {
+  const cb = document.getElementById(id);
+  cb.checked = !cb.checked;
+}
+function selectAllEvents() {
+  ['ev1','ev2','ev3','ev4'].forEach(id => { document.getElementById(id).checked = true; });
+}
+function proceedToName() {
+  const checked = ['ev1','ev2','ev3','ev4']
+    .filter(id => document.getElementById(id).checked)
+    .map(id => document.getElementById(id).value);
+  const errEl = document.getElementById('eventErrorMsg');
+  if (checked.length === 0) { errEl.classList.add('visible'); return; }
+  errEl.classList.remove('visible');
+  selectedEventItems = checked;
+  document.getElementById('selectedClassName').textContent = selectedClass.name;
+  document.getElementById('selectedClassDatetime').textContent = '参加項目：' + checked.map(v => v.split(' ')[0]).join('・');
+  document.getElementById('eventSelectScreen').classList.remove('visible');
+  document.getElementById('formSection').classList.add('visible', 'fade-in');
+  document.getElementById('nameInput').focus();
+}
 
-    if (!name) {
-      errorMsg.textContent = 'お名前を入力してください。';
+function backToCalendar() {
+  document.getElementById('formSection').classList.remove('visible');
+  document.getElementById('eventSelectScreen').classList.remove('visible');
+  document.getElementById('calendarSection').style.display = 'block';
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('errorMsg').classList.remove('visible');
+  document.getElementById('eventErrorMsg').classList.remove('visible');
+}
+
+async function submitReservation() {
+  const name = document.getElementById('nameInput').value.trim();
+  const email = document.getElementById('emailInput').value.trim();
+  const errorMsg = document.getElementById('errorMsg');
+  if (!name) { errorMsg.textContent = 'お名前を入力してください。'; errorMsg.classList.add('visible'); return; }
+  errorMsg.classList.remove('visible');
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '送信中…';
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        className: selectedClass.name,
+        datetime: selectedClass.datetime,
+        name, rawDate: selectedClass.rawDate, email,
+        eventItems: selectedEventItems.length > 0 ? selectedEventItems.join(' / ') : ''
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('formSection').classList.remove('visible');
+      document.getElementById('stepIndicator').style.display = 'none';
+      document.getElementById('successScreen').classList.add('visible', 'fade-in');
+    } else {
+      errorMsg.textContent = data.message || 'エラーが発生しました。';
       errorMsg.classList.add('visible');
-      return;
+      btn.disabled = false; btn.textContent = '予約を確定する';
     }
-
-    errorMsg.classList.remove('visible');
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = '送信中…';
-
-    try {
-      const res = await fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({
-          className: selectedClass.name,
-          datetime: selectedClass.datetime,
-          name,
-          rawDate: selectedClass.rawDate,
-          email,
-          eventItems: selectedEventItems.length > 0 ? selectedEventItems.join(' / ') : ''
-        })
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        document.getElementById('formSection').classList.remove('visible');
-        document.getElementById('stepIndicator').style.display = 'none';
-        document.getElementById('successScreen').classList.add('visible', 'fade-in');
-      } else {
-        errorMsg.textContent = data.message || 'エラーが発生しました。もう一度お試しください。';
-        errorMsg.classList.add('visible');
-        btn.disabled = false;
-        btn.textContent = '予約を確定する';
-      }
-    } catch (e) {
-      errorMsg.textContent = '通信エラーが発生しました。時間をおいて再度お試しください。';
-      errorMsg.classList.add('visible');
-      btn.disabled = false;
-      btn.textContent = '予約を確定する';
-    }
+  } catch (e) {
+    errorMsg.textContent = '通信エラーが発生しました。';
+    errorMsg.classList.add('visible');
+    btn.disabled = false; btn.textContent = '予約を確定する';
   }
+}
 
-  function resetAll() {
-    selectedClass = null;
-    document.getElementById('nameInput').value = '';
-    document.getElementById('emailInput').value = '';
-    selectedEventItems = [];
-    ['ev1','ev2','ev3','ev4'].forEach(id => { document.getElementById(id).checked = false; });
-    document.getElementById('eventSelectScreen').classList.remove('visible');
-    document.getElementById('successScreen').classList.remove('visible');
-    document.getElementById('stepIndicator').style.display = 'flex';
-    document.getElementById('formSection').classList.remove('visible');
-    document.getElementById('classSection').style.display = 'block';
-    document.getElementById('step1').classList.add('active');
-    document.getElementById('step2').classList.remove('active');
-    loadClasses();
-  }
-
-  // 初期ロード
+function resetAll() {
+  selectedClass = null; selectedEventItems = [];
+  document.getElementById('nameInput').value = '';
+  document.getElementById('emailInput').value = '';
+  ['ev1','ev2','ev3','ev4'].forEach(id => { document.getElementById(id).checked = false; });
+  document.getElementById('eventSelectScreen').classList.remove('visible');
+  document.getElementById('successScreen').classList.remove('visible');
+  document.getElementById('stepIndicator').style.display = 'flex';
+  document.getElementById('formSection').classList.remove('visible');
+  document.getElementById('calendarSection').style.display = 'block';
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('step2').classList.remove('active');
   loadClasses();
+}
+
+loadClasses();
 </script>
 </body>
 </html>
