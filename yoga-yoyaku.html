@@ -599,9 +599,8 @@ function renderCalendar() {
       dotsEl.className = 'cal-dots';
       dayClasses.forEach(c => {
         const dot = document.createElement('div');
-        const isEigo = c.name.includes('英会話');
-        const isEvent = c.name.includes('ダンス') || c.name.includes('ジャンベ') || c.name.includes('つくる') || c.name.includes('COSMOS') || c.name.includes('上映会');
-        dot.className = 'cal-dot' + (isEigo ? ' eigo' : isEvent ? ' event' : '');
+        const t = c.type || (c.name.includes('英会話') ? 'eigo' : 'yoga');
+        dot.className = 'cal-dot' + (t === 'eigo' ? ' eigo' : t === 'event' ? ' event' : '');
         dotsEl.appendChild(dot);
       });
       cell.appendChild(dotsEl);
@@ -647,8 +646,9 @@ function showDayClasses(key, dateLabel, classes) {
     classes.forEach(cls => {
       const isFull = cls.available <= 0;
       const isFew = !isFull && cls.available <= 2;
-      const isEigo = cls.name.includes('英会話');
-      const isEvent = cls.name.includes('ダンス') || cls.name.includes('ジャンベ') || cls.name.includes('つくる') || cls.name.includes('COSMOS') || cls.name.includes('上映会');
+      const t = cls.type || (cls.name.includes('英会話') ? 'eigo' : 'yoga');
+      const isEigo = t === 'eigo';
+      const isEvent = t === 'event';
 
       const item = document.createElement('div');
       let itemCls = 'day-class-item';
@@ -695,7 +695,7 @@ function closeDayClasses() {
 
 function selectClass(cls) {
   selectedClass = cls;
-  const isEvent = cls.name.includes('COSMOS') || cls.name.includes('上映会');
+  const isEvent = cls.type === 'event';
 
   document.getElementById('calendarSection').style.display = 'none';
   document.getElementById('dayClasses').classList.remove('visible');
