@@ -695,7 +695,7 @@ function closeDayClasses() {
 
 function selectClass(cls) {
   selectedClass = cls;
-  const isEvent = cls.type === 'event';
+  const isEvent = cls.name.includes('COSMOS') || cls.name.includes('上映会');
 
   document.getElementById('calendarSection').style.display = 'none';
   document.getElementById('dayClasses').classList.remove('visible');
